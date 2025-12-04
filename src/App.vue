@@ -1,30 +1,168 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="app-container w-full h-screen overflow-hidden bg-slate-900 text-slate-200 font-sans">
+    <!-- Main Scroll Container -->
+    <div 
+      ref="container"
+      class="w-full h-full relative transition-transform duration-700 ease-in-out"
+      :style="{ transform: `translateY(-${currentSceneIndex * 100}%)` }"
+      @wheel="handleScroll"
+      @touchstart="handleTouchStart"
+      @touchend="handleTouchEnd"
+    >
+      <!-- Render Scenes -->
+      <div 
+        v-for="(scene, index) in scenes" 
+        :key="index"
+        class="w-full h-full relative"
+      >
+        <!-- Dynamic Component Rendering -->
+        <component 
+          :is="scene.component" 
+          v-bind="scene.props" 
+          @complete="unlockScene(index)"
+        />
+
+        <!-- Lock Overlay for Games -->
+        <div 
+          v-if="scene.isGame && !scene.completed" 
+          class="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-xs uppercase tracking-widest backdrop-blur-sm"
+        >
+          Locked
+        </div>
+        
+        <!-- Navigation Hint -->
+        <div 
+          v-if="!scene.isGame || scene.completed"
+          class="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce opacity-50"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+      </div>
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<script setup>
+import { ref, shallowRef } from 'vue'
+import Scene from './components/Scene.vue'
+import BalanceGame from './components/BalanceGame.vue'
+import LanguageGame from './components/LanguageGame.vue'
+import WakeUpGame from './components/WakeUpGame.vue'
+
+// Scene Configuration
+const scenes = ref([
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/10/1920/1080', caption: 'It started like any other day...' },
+    isGame: false 
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/11/1920/1080', caption: 'But something felt off balance.' },
+    isGame: false 
+  },
+  { 
+    component: shallowRef(BalanceGame), 
+    props: {}, 
+    isGame: true,
+    completed: false 
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/12/1920/1080', caption: 'Words couldn\'t express the feeling.' },
+    isGame: false 
+  },
+  { 
+    component: shallowRef(LanguageGame), 
+    props: {}, 
+    isGame: true,
+    completed: false 
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/13/1920/1080', caption: 'Exhaustion took over.' },
+    isGame: false 
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/14/1920/1080', caption: 'Trying to stay awake...' },
+    isGame: false 
+  },
+  { 
+    component: shallowRef(WakeUpGame), 
+    props: {}, 
+    isGame: true,
+    completed: false 
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/15/1920/1080', caption: 'Finally, clarity.' },
+    isGame: false 
+  }
+])
+
+const currentSceneIndex = ref(0)
+const isScrolling = ref(false)
+
+// Unlock Logic
+const unlockScene = (index) => {
+  scenes.value[index].completed = true
+  // Auto advance after a brief delay for satisfaction
+  setTimeout(() => {
+    if (currentSceneIndex.value < scenes.value.length - 1) {
+      currentSceneIndex.value++
+    }
+  }, 1000)
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+// Scroll Handling
+const handleScroll = (e) => {
+  if (isScrolling.value) return
+  
+  // Debounce
+  isScrolling.value = true
+  setTimeout(() => isScrolling.value = false, 800)
+
+  const direction = e.deltaY > 0 ? 1 : -1
+  attemptNavigation(direction)
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+// Touch Handling
+let touchStartY = 0
+const handleTouchStart = (e) => {
+  touchStartY = e.touches[0].clientY
+}
+const handleTouchEnd = (e) => {
+  const touchEndY = e.changedTouches[0].clientY
+  const diff = touchStartY - touchEndY
+  
+  if (Math.abs(diff) > 50) { // Threshold
+    const direction = diff > 0 ? 1 : -1
+    attemptNavigation(direction)
+  }
+}
+
+const attemptNavigation = (direction) => {
+  const currentScene = scenes.value[currentSceneIndex.value]
+  
+  // Prevent moving forward if current scene is an incomplete game
+  if (direction > 0 && currentScene.isGame && !currentScene.completed) {
+    // Shake effect or visual feedback could go here
+    return
+  }
+
+  const nextIndex = currentSceneIndex.value + direction
+  if (nextIndex >= 0 && nextIndex < scenes.value.length) {
+    currentSceneIndex.value = nextIndex
+  }
+}
+</script>
+
+<style>
+/* Global Reset */
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent native scroll */
 }
 </style>
