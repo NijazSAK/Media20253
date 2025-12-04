@@ -1,8 +1,13 @@
 <template>
   <div class="language-game w-full h-full flex flex-col items-center justify-between bg-amber-50 p-8 relative overflow-hidden">
     
+    <!-- Custom Background -->
+    <div v-if="backgroundImage" class="absolute inset-0 z-0">
+      <img :src="backgroundImage" class="w-full h-full object-cover opacity-30" />
+    </div>
+
     <!-- Background / Counter -->
-    <div class="absolute inset-0 bg-amber-100/50 pointer-events-none"></div>
+    <div v-else class="absolute inset-0 bg-amber-100/50 pointer-events-none"></div>
     <div class="absolute bottom-0 w-full h-1/3 bg-amber-200 border-t-4 border-amber-300 pointer-events-none"></div>
 
     <!-- Clerk (Stick Figure) -->
@@ -69,6 +74,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+
+const props = defineProps({
+  backgroundImage: String
+})
 
 const emit = defineEmits(['complete'])
 

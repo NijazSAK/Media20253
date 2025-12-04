@@ -55,7 +55,17 @@ import WakeUpGame from './components/WakeUpGame.vue'
 const scenes = ref([
   { 
     component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/10/1920/1080', caption: 'It started like any other day...' },
+    // Quick shots of city life
+    props: { 
+      src: [
+        'https://picsum.photos/id/43/1920/1080', // City
+        'https://picsum.photos/id/48/1920/1080', // Architecture
+        'https://picsum.photos/id/60/1920/1080', // Office
+        'https://picsum.photos/id/180/1920/1080' // Laptop
+      ], 
+      caption: 'It started like any other day... fast paced.',
+      animationSpeed: 400 
+    },
     isGame: false 
   },
   { 
@@ -71,7 +81,16 @@ const scenes = ref([
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/12/1920/1080', caption: 'Words couldn\'t express the feeling.' },
+    // Disoriented shots
+    props: { 
+      src: [
+        'https://picsum.photos/id/12/1920/1080',
+        'https://picsum.photos/id/16/1920/1080',
+        'https://picsum.photos/id/20/1920/1080'
+      ],
+      caption: 'Words couldn\'t express the feeling.',
+      animationSpeed: 800
+    },
     isGame: false 
   },
   { 
@@ -82,7 +101,16 @@ const scenes = ref([
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/13/1920/1080', caption: 'Exhaustion took over.' },
+    // Darker, slower shots
+    props: { 
+      src: [
+        'https://picsum.photos/id/13/1920/1080', // Beach/Calm?
+        'https://picsum.photos/id/19/1920/1080', // Darker
+        'https://picsum.photos/id/26/1920/1080'  // Objects
+      ],
+      caption: 'Exhaustion took over.',
+      animationSpeed: 1500
+    },
     isGame: false 
   },
   { 

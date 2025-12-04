@@ -1,7 +1,7 @@
 <template>
   <div class="scene-image w-full h-full flex items-center justify-center bg-gray-900 relative overflow-hidden">
     <img 
-      :src="src" 
+      :src="currentSrc" 
       class="w-full h-full object-cover transition-transform duration-[2000ms] ease-in-out hover:scale-105"
       alt="Scene"
     />
@@ -13,8 +13,45 @@
 </template>
 
 <script setup>
-defineProps({
-  src: String,
-  caption: String
+import { ref, computed, watch, onUnmounted } from 'vue'
+
+const props = defineProps({
+  src: [String, Array],
+  caption: String,
+  animationSpeed: {
+    type: Number,
+    default: 1000 // ms per frame
+  },
+  isActive: Boolean
 })
+
+const currentFrameIndex = ref(0)
+let animationInterval = null
+
+const currentSrc = computed(() => {
+  if (Array.isArray(props.src)) {
+    return props.src[currentFrameIndex.value]
+  }
+  return props.src
+})
+
+const startAnimation = () => {
+  if (Array.isArray(props.src) && props.src.length > 1) {
+    stopAnimation()
+    animationInterval = setInterval(() => {
+      currentFrameIndex.value = (currentFrameIndex.value + 1) % props.src.length
+    }, props.animationSpeed)
+  }
+}
+
+const stopAnimation = () => {
+  if (animationInterval) clearInterval(animationInterval)
+}
+
+watch(() => props.isActive, (active) => {
+  if (active) startAnimation()
+  else stopAnimation()
+}, { immediate: true })
+
+onUnmounted(stopAnimation)
 </script>

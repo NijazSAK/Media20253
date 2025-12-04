@@ -1,8 +1,13 @@
 <template>
   <div class="wakeup-game w-full h-full relative overflow-hidden bg-slate-900 select-none">
     
+    <!-- Custom Background -->
+    <div v-if="backgroundImage" class="absolute inset-0 z-0">
+      <img :src="backgroundImage" class="w-full h-full object-cover opacity-50" />
+    </div>
+
     <!-- Split Screen Background -->
-    <div class="absolute inset-0 flex">
+    <div v-else class="absolute inset-0 flex">
       <!-- Opponent Side (Top-Left) -->
       <div class="w-full h-full relative bg-amber-200 overflow-hidden clip-diagonal-top">
         <div class="absolute bottom-20 right-32 flex flex-col items-center transform scale-125">
@@ -66,8 +71,8 @@
           <div class="absolute top-[75%] bottom-0 w-full bg-gradient-to-b from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-100" :class="{ 'opacity-100': activeKey === col }"></div>
           
           <!-- Key Hint -->
-          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/50 font-bold text-xl">
-            {{ ['D', 'F', 'J', 'K'][col-1] }}
+          <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/50 font-bold text-2xl">
+            {{ ['←', '↓', '↑', '→'][col-1] }}
           </div>
         </div>
 
@@ -75,16 +80,17 @@
         <div 
           v-for="tile in tiles" 
           :key="tile.id"
-          class="absolute w-[25%] h-32 bg-black rounded-md cursor-pointer hover:bg-slate-800 active:bg-slate-700 transition-colors border-2 border-white/20 z-10"
+          class="absolute w-[25%] h-32 bg-black rounded-md transition-colors border-2 border-white/20 z-10 flex items-center justify-center"
           :style="{ 
             left: `${(tile.col - 1) * 25}%`, 
             top: `${tile.y}%`,
             opacity: tile.hit ? 0 : 1,
             borderColor: tile.hit ? '#4ade80' : 'rgba(255,255,255,0.2)'
           }"
-          @mousedown="hitTile(tile)"
-          @touchstart.prevent="hitTile(tile)"
-        ></div>
+        >
+          <!-- Arrow Icon on Tile -->
+          <span class="text-white/50 text-2xl font-bold">{{ ['←', '↓', '↑', '→'][tile.col-1] }}</span>
+        </div>
       </div>
     </div>
 
@@ -92,7 +98,7 @@
     <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center">
       <div class="text-4xl font-bold text-slate-800 drop-shadow-md">{{ timeLeft.toFixed(1) }}s</div>
       <div class="text-sm font-bold text-slate-800 uppercase tracking-widest bg-white/80 px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
-        Hit tiles on the line!
+        Use Arrow Keys!
       </div>
     </div>
 
@@ -108,7 +114,8 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
-  isActive: Boolean
+  isActive: Boolean,
+  backgroundImage: String
 })
 
 const emit = defineEmits(['complete'])
@@ -122,8 +129,8 @@ const opponentBlinked = ref(false)
 const activeKey = ref(null)
 
 // Config
-const spawnRate = 500 // ms
-const fallSpeed = 0.8 // % per frame
+const spawnRate = 300 // ms
+const fallSpeed = 1.2 // % per frame
 const hitLineY = 85 // %
 const hitTolerance = 12 // % +/-
 let gameLoop = null
@@ -200,30 +207,6 @@ const update = () => {
   gameLoop = requestAnimationFrame(update)
 }
 
-const hitTile = (tile) => {
-  if (!isPlaying.value || tile.hit) return
-  
-  // Check Hit Zone
-  const dist = Math.abs(tile.y + 10 - hitLineY) // +10 to center hit on tile roughly (tile is 32px height, % is tricky, let's approx)
-  // Actually tile.y is top. Tile height is 32px (fixed) or %? 
-  // In template: h-32 (8rem). Screen height varies.
-  // Let's use simple logic: if tile top is within range [hitLineY - 20, hitLineY + 5]
-  
-  // Let's be generous: if tile overlaps line.
-  // Tile top: tile.y. Tile bottom: tile.y + ~15 (approx 15% height).
-  // Line: 85.
-  // Hit if tile.y > 70 && tile.y < 90
-  
-  if (tile.y > (hitLineY - 20) && tile.y < (hitLineY + 5)) {
-    tile.hit = true
-    activeKey.value = tile.col
-    setTimeout(() => activeKey.value = null, 100)
-  } else {
-    // Missed click (too early/late)
-    // Optional: Penalty?
-  }
-}
-
 const handleInput = (col) => {
   if (!isPlaying.value) return
   
@@ -258,9 +241,15 @@ const handleWin = () => {
 }
 
 const handleKeydown = (e) => {
-  const keyMap = { 'd': 1, 'f': 2, 'j': 3, 'k': 4 }
+  const keyMap = { 
+    'arrowleft': 1, 
+    'arrowdown': 2, 
+    'arrowup': 3, 
+    'arrowright': 4 
+  }
   const col = keyMap[e.key.toLowerCase()]
   if (col) {
+    e.preventDefault() // Prevent scroll
     handleInput(col)
   }
 }

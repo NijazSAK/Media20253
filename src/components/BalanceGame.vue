@@ -1,8 +1,13 @@
 <template>
   <div class="balance-game relative w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden perspective-container">
     
-    <!-- Alleyway Background -->
-    <div class="absolute inset-0 overflow-hidden transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
+    <!-- Custom Background Image -->
+    <div v-if="backgroundImage" class="absolute inset-0 z-0">
+      <img :src="backgroundImage" class="w-full h-full object-cover opacity-50" />
+    </div>
+
+    <!-- Alleyway Background (Default) -->
+    <div v-else class="absolute inset-0 overflow-hidden transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
       <!-- Sky/Night -->
       <div class="absolute top-0 w-full h-1/2 bg-gradient-to-b from-slate-900 to-slate-800"></div>
       <!-- Ground -->
@@ -106,7 +111,8 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
-  isActive: Boolean
+  isActive: Boolean,
+  backgroundImage: String
 })
 
 const emit = defineEmits(['complete'])
