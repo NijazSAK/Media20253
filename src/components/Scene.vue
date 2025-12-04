@@ -25,8 +25,11 @@ const props = defineProps({
   isActive: Boolean
 })
 
+const emit = defineEmits(['complete'])
+
 const currentFrameIndex = ref(0)
 let animationInterval = null
+let completionTimeout = null
 
 const currentSrc = computed(() => {
   if (Array.isArray(props.src)) {
@@ -38,14 +41,28 @@ const currentSrc = computed(() => {
 const startAnimation = () => {
   if (Array.isArray(props.src) && props.src.length > 1) {
     stopAnimation()
+    
+    // Play animation
     animationInterval = setInterval(() => {
       currentFrameIndex.value = (currentFrameIndex.value + 1) % props.src.length
     }, props.animationSpeed)
+
+    // Schedule completion
+    const duration = props.src.length * props.animationSpeed
+    completionTimeout = setTimeout(() => {
+      emit('complete')
+    }, duration)
+  } else {
+    // Static image
+    completionTimeout = setTimeout(() => {
+      emit('complete')
+    }, 1000) // Brief pause for static scenes
   }
 }
 
 const stopAnimation = () => {
   if (animationInterval) clearInterval(animationInterval)
+  if (completionTimeout) clearTimeout(completionTimeout)
 }
 
 watch(() => props.isActive, (active) => {

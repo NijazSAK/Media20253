@@ -5,9 +5,6 @@
       ref="container"
       class="w-full h-full relative transition-transform duration-700 ease-in-out"
       :style="{ transform: `translateY(-${currentSceneIndex * 100}%)` }"
-      @wheel="handleScroll"
-      @touchstart="handleTouchStart"
-      @touchend="handleTouchEnd"
     >
       <!-- Render Scenes -->
       <div 
@@ -34,10 +31,11 @@
         
         <!-- Navigation Hint -->
         <div 
-          v-if="!scene.isGame || scene.completed"
-          class="absolute bottom-4 left-1/2 transform -translate-x-1/2 animate-bounce opacity-50"
+          v-if="scene.completed && index < scenes.length - 1"
+          class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce flex flex-col items-center gap-2 opacity-80"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+          <span class="text-white text-sm font-mono tracking-widest uppercase bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">Press ↓</span>
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
         </div>
       </div>
     </div>
@@ -66,12 +64,14 @@ const scenes = ref([
       caption: 'It started like any other day... fast paced.',
       animationSpeed: 400 
     },
-    isGame: false 
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(Scene), 
     props: { src: 'https://picsum.photos/id/11/1920/1080', caption: 'But something felt off balance.' },
-    isGame: false 
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(BalanceGame), 
@@ -91,7 +91,8 @@ const scenes = ref([
       caption: 'Words couldn\'t express the feeling.',
       animationSpeed: 800
     },
-    isGame: false 
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(LanguageGame), 
@@ -111,12 +112,14 @@ const scenes = ref([
       caption: 'Exhaustion took over.',
       animationSpeed: 1500
     },
-    isGame: false 
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(Scene), 
     props: { src: 'https://picsum.photos/id/14/1920/1080', caption: 'Trying to stay awake...' },
-    isGame: false 
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(WakeUpGame), 
@@ -127,7 +130,8 @@ const scenes = ref([
   { 
     component: shallowRef(Scene), 
     props: { src: 'https://picsum.photos/id/15/1920/1080', caption: 'Finally, clarity.' },
-    isGame: false 
+    isGame: false,
+    completed: false
   }
 ])
 
@@ -146,63 +150,22 @@ const unlockScene = (index, payload) => {
       scenes.value[3].props.caption = "I made it through the alley, steady on my feet."
     }
   }
-
-  // Auto advance after a brief delay for satisfaction
-  setTimeout(() => {
-    if (currentSceneIndex.value < scenes.value.length - 1) {
-      currentSceneIndex.value++
-    }
-  }, 1000)
-}
-
-// Scroll Handling
-const handleScroll = (e) => {
-  if (isScrolling.value) return
-  
-  // Debounce
-  isScrolling.value = true
-  setTimeout(() => isScrolling.value = false, 800)
-
-  const direction = e.deltaY > 0 ? 1 : -1
-  attemptNavigation(direction)
-}
-
-// Touch Handling
-let touchStartY = 0
-const handleTouchStart = (e) => {
-  touchStartY = e.touches[0].clientY
-}
-const handleTouchEnd = (e) => {
-  const touchEndY = e.changedTouches[0].clientY
-  const diff = touchStartY - touchEndY
-  
-  if (Math.abs(diff) > 50) { // Threshold
-    const direction = diff > 0 ? 1 : -1
-    attemptNavigation(direction)
-  }
-}
-
-const attemptNavigation = (direction) => {
-  const currentScene = scenes.value[currentSceneIndex.value]
-  
-  // Prevent moving forward if current scene is an incomplete game
-  if (direction > 0 && currentScene.isGame && !currentScene.completed) {
-    // Shake effect or visual feedback could go here
-    return
-  }
-
-  const newIndex = currentSceneIndex.value + direction
-  if (newIndex >= 0 && newIndex < scenes.value.length) {
-    currentSceneIndex.value = newIndex
-  }
 }
 
 const handleKeydown = (e) => {
+  const currentScene = scenes.value[currentSceneIndex.value]
+
+  // Navigation (Down Arrow)
+  if (e.key === 'ArrowDown') {
+    if (currentScene.completed && currentSceneIndex.value < scenes.value.length - 1) {
+      currentSceneIndex.value++
+    }
+  }
+
   // Skip Game Cheat
   if (e.key.toLowerCase() === 's') {
-    const currentScene = scenes.value[currentSceneIndex.value]
     if (currentScene.isGame && !currentScene.completed) {
-      unlockScene(currentSceneIndex.value)
+      unlockScene(currentSceneIndex.value, { success: true })
     }
   }
 }
