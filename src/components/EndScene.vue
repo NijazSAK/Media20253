@@ -1,36 +1,48 @@
 <template>
   <div class="end-scene w-full h-full flex items-center justify-center bg-black relative overflow-hidden">
-    <!-- Background Image -->
-    <div class="absolute inset-0 transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
-      <img 
-        :src="src" 
-        class="w-full h-full object-cover opacity-60"
-        alt="End Scene"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
+    <!-- Background Image Slideshow -->
+    <div class="absolute inset-0">
+      <transition-group name="fade">
+        <div 
+          v-for="(image, index) in src" 
+          v-show="index === currentIndex"
+          :key="image"
+          class="absolute inset-0 w-full h-full"
+        >
+          <img 
+            :src="image" 
+            class="w-full h-full object-cover opacity-60"
+            alt="End Scene"
+          />
+        </div>
+      </transition-group>
+      <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black z-10"></div>
     </div>
 
     <!-- Story Text -->
-    <div class="relative z-10 max-w-2xl px-8 text-center">
-      <p 
-        class="text-2xl md:text-4xl font-light text-white leading-relaxed tracking-wide transition-all duration-1000"
-        :class="{ 'opacity-100 translate-y-0': showText, 'opacity-0 translate-y-4': !showText }"
-      >
-        {{ currentText }}
-      </p>
-      <div v-if="isActive && !ended" class="mt-8 animate-bounce text-white/30 text-sm uppercase tracking-widest">
-        Press ↓
+    <div class="relative z-20 max-w-2xl px-8 text-center">
+      <transition name="fade" mode="out-in">
+        <p 
+          :key="currentIndex"
+          class="text-2xl md:text-4xl font-light text-white leading-relaxed tracking-wide"
+        >
+          {{ script[currentIndex] }}
+        </p>
+      </transition>
+      
+      <div v-if="isActive && !hasStarted" class="mt-8 animate-bounce text-white/30 text-sm uppercase tracking-widest">
+        Press ↓ to Start Flashback
       </div>
     </div>
 
     <!-- Audio Element -->
     <audio ref="audioPlayer" :src="audioSrc" loop preload="auto"></audio>
     
-    <!-- Replay Button (Optional, appears at end) -->
+    <!-- Replay Button -->
     <button 
       v-if="ended"
       @click="replay"
-      class="absolute bottom-10 px-6 py-2 border border-white/30 text-white/50 hover:text-white hover:border-white rounded-full transition-all uppercase tracking-widest text-sm z-20"
+      class="absolute bottom-10 px-6 py-2 border border-white/30 text-white/50 hover:text-white hover:border-white rounded-full transition-all uppercase tracking-widest text-sm z-30"
     >
       Replay Story
     </button>
@@ -42,7 +54,10 @@ import { ref, watch, onUnmounted, onMounted } from 'vue'
 
 const props = defineProps({
   isActive: Boolean,
-  src: String,
+  src: {
+    type: Array,
+    default: () => []
+  },
   audioSrc: String,
   script: {
     type: Array,
@@ -53,10 +68,10 @@ const props = defineProps({
 const emit = defineEmits(['complete'])
 
 const audioPlayer = ref(null)
-const currentText = ref('')
-const currentLineIndex = ref(-1)
-const showText = ref(false)
+const currentIndex = ref(0)
+const hasStarted = ref(false)
 const ended = ref(false)
+let slideInterval = null
 
 const startSequence = () => {
   if (!audioPlayer.value) return
@@ -64,7 +79,7 @@ const startSequence = () => {
   // Reset
   audioPlayer.value.currentTime = 0
   audioPlayer.value.volume = 0
-  audioPlayer.value.play().catch(e => console.log("Audio play failed (interaction needed?):", e))
+  audioPlayer.value.play().catch(e => console.log("Audio play failed:", e))
   
   // Fade in audio
   const fadeAudio = setInterval(() => {
@@ -74,33 +89,26 @@ const startSequence = () => {
       clearInterval(fadeAudio)
     }
   }, 200)
-
-  // Start with first line
-  nextLine()
 }
 
-const nextLine = () => {
-  if (ended.value) return
-
-  if (currentLineIndex.value < props.script.length - 1) {
-    // Fade out old
-    showText.value = false
-    
-    setTimeout(() => {
-      currentLineIndex.value++
-      currentText.value = props.script[currentLineIndex.value]
-      showText.value = true
-    }, 500)
-  } else {
-    // End
-    ended.value = true
-    emit('complete')
-  }
+const startSlideshow = () => {
+  if (hasStarted.value) return
+  hasStarted.value = true
+  
+  slideInterval = setInterval(() => {
+    if (currentIndex.value < props.src.length - 1) {
+      currentIndex.value++
+    } else {
+      // End
+      clearInterval(slideInterval)
+      ended.value = true
+      emit('complete')
+    }
+  }, 5000) // 5 seconds per slide
 }
 
 const stopSequence = () => {
   if (audioPlayer.value) {
-    // Fade out audio
     const fadeAudio = setInterval(() => {
       if (audioPlayer.value.volume > 0.1) {
         audioPlayer.value.volume -= 0.1
@@ -110,18 +118,20 @@ const stopSequence = () => {
       }
     }, 200)
   }
+  if (slideInterval) clearInterval(slideInterval)
 }
 
 const replay = () => {
   ended.value = false
-  currentLineIndex.value = -1
+  hasStarted.value = false
+  currentIndex.value = 0
   startSequence()
 }
 
 const handleKeydown = (e) => {
   if (!props.isActive) return
   if (e.key === 'ArrowDown') {
-    nextLine()
+    startSlideshow()
   }
 }
 
@@ -142,3 +152,15 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

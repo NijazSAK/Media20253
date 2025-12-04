@@ -131,7 +131,17 @@ const scenes = ref([
   { 
     component: shallowRef(EndScene), 
     props: { 
-      src: 'https://picsum.photos/id/15/1920/1080', 
+      // Flashback Sequence (8 images for 8 lines)
+      src: [
+        'https://picsum.photos/id/43/1920/1080',  // City (Start)
+        'https://picsum.photos/id/11/1920/1080',  // Balance
+        'https://picsum.photos/id/12/1920/1080',  // Confusion
+        'https://picsum.photos/id/13/1920/1080',  // Exhaustion
+        'https://picsum.photos/id/14/1920/1080',  // Struggle
+        'https://picsum.photos/id/15/1920/1080',  // Clarity
+        'https://picsum.photos/id/28/1920/1080',  // Forest/Nature
+        'https://picsum.photos/id/29/1920/1080'   // Sunrise/New Path
+      ],
       // Place your audio file in public/music/ending.mp3
       audioSrc: '/music/ending.mp3', 
       script: [
