@@ -97,16 +97,8 @@
     <!-- UI Overlay -->
     <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center">
       <div class="text-4xl font-bold text-slate-800 drop-shadow-md">{{ timeLeft.toFixed(1) }}s</div>
-      <div class="text-sm font-bold text-slate-800 uppercase tracking-widest bg-white/80 px-4 py-1 rounded-full backdrop-blur-sm shadow-sm mt-2">
+      <div class="text-sm font-bold text-slate-800 uppercase tracking-widest bg-white/80 px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
         Use Arrow Keys!
-      </div>
-      <!-- Feedback Text -->
-      <div 
-        v-if="feedbackText"
-        class="absolute top-20 text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-orange-500 drop-shadow-lg animate-pop-out"
-        :key="feedbackKey"
-      >
-        {{ feedbackText }}
       </div>
     </div>
 
@@ -135,8 +127,6 @@ const timeLeft = ref(10)
 const playerBlinked = ref(false)
 const opponentBlinked = ref(false)
 const activeKey = ref(null)
-const feedbackText = ref('')
-const feedbackKey = ref(0)
 
 // Config
 const spawnRate = 300 // ms
@@ -163,7 +153,6 @@ const resetGame = () => {
   playerBlinked.value = false
   opponentBlinked.value = false
   isPlaying.value = false
-  feedbackText.value = ''
 }
 
 const startGame = () => {
@@ -231,22 +220,7 @@ const handleInput = (col) => {
 
   if (target) {
     target.hit = true
-    // Feedback
-    const dist = Math.abs(target.y - hitLineY)
-    if (dist < 5) showFeedback("PERFECT!")
-    else showFeedback("GOOD!")
-  } else {
-    // Miss penalty?
-    // showFeedback("MISS!")
   }
-}
-
-const showFeedback = (text) => {
-  feedbackText.value = text
-  feedbackKey.value++
-  setTimeout(() => {
-    if (feedbackText.value === text) feedbackText.value = ''
-  }, 500)
 }
 
 const handleFail = () => {
@@ -312,15 +286,5 @@ onUnmounted(() => {
   80% { height: 0%; }
   82% { height: 20%; }
   84% { height: 0%; }
-}
-
-.animate-pop-out {
-  animation: popOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes popOut {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 0; }
 }
 </style>
