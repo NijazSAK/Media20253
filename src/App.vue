@@ -164,13 +164,13 @@ const scenes = ref([
       audioSrc: '/music/ending.mp3', 
       script: [
         "The city rush, a blur of grey,",
-        "A stumble in the alleyway.",
-        "Words unspoken, lost in air,",
-        "A heavy gaze, a vacant stare.",
-        "But through the noise, a silence grew,",
-        "A clarity I never knew.",
-        "Fuel your day, the easy way.",
-        "StickBurger 10-Minute Meals. Ready when you are." // Slogan
+        "Stumbling through the alleyway.",
+        "Words get lost, the mind goes weak,",
+        "Energy is the thing you seek.",
+        "Why fight the tired, heavy eyes?",
+        "When the secret to winning lies...",
+        "...in a flavor that's quick and real.",
+        "StickBurger. The 10-Minute Ready Meal."
       ]
     },
     isGame: false,
