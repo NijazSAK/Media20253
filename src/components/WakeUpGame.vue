@@ -65,9 +65,17 @@ const update = () => {
 
 onMounted(() => {
   gameLoop = requestAnimationFrame(update)
+  window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(gameLoop)
+  window.removeEventListener('keydown', handleKeydown)
 })
+
+const handleKeydown = (e) => {
+  if (e.code === 'Space' || e.key === ' ') {
+    handleClick()
+  }
+}
 </script>

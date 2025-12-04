@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef } from 'vue'
+import { ref, shallowRef, onMounted, onUnmounted } from 'vue'
 import Scene from './components/Scene.vue'
 import BalanceGame from './components/BalanceGame.vue'
 import LanguageGame from './components/LanguageGame.vue'
@@ -151,11 +151,23 @@ const attemptNavigation = (direction) => {
     return
   }
 
-  const nextIndex = currentSceneIndex.value + direction
-  if (nextIndex >= 0 && nextIndex < scenes.value.length) {
-    currentSceneIndex.value = nextIndex
+const handleKeydown = (e) => {
+  // Skip Game Cheat
+  if (e.key.toLowerCase() === 's') {
+    const currentScene = scenes.value[currentSceneIndex.value]
+    if (currentScene.isGame && !currentScene.completed) {
+      unlockScene(currentSceneIndex.value)
+    }
   }
 }
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <style>

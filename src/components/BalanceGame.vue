@@ -116,11 +116,30 @@ onMounted(() => {
   // Initial random tilt
   tilt.value = (Math.random() - 0.5) * 30
   gameLoop = requestAnimationFrame(update)
+  
+  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keyup', handleKeyup)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(gameLoop)
+  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keyup', handleKeyup)
 })
+
+const handleKeydown = (e) => {
+  if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') {
+    startPush(-1)
+  } else if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') {
+    startPush(1)
+  }
+}
+
+const handleKeyup = (e) => {
+  if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key.toLowerCase()) || ['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    stopPush()
+  }
+}
 </script>
 
 <style scoped>
