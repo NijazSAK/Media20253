@@ -18,10 +18,13 @@
       >
         {{ currentText }}
       </p>
+      <div v-if="isActive && !ended" class="mt-8 animate-bounce text-white/30 text-sm uppercase tracking-widest">
+        Press ↓
+      </div>
     </div>
 
     <!-- Audio Element -->
-    <audio ref="audioPlayer" :src="audioSrc" preload="auto" @ended="onAudioEnded"></audio>
+    <audio ref="audioPlayer" :src="audioSrc" loop preload="auto"></audio>
     
     <!-- Replay Button (Optional, appears at end) -->
     <button 
@@ -35,7 +38,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onUnmounted, onMounted } from 'vue'
 
 const props = defineProps({
   isActive: Boolean,
@@ -51,9 +54,9 @@ const emit = defineEmits(['complete'])
 
 const audioPlayer = ref(null)
 const currentText = ref('')
+const currentLineIndex = ref(-1)
 const showText = ref(false)
 const ended = ref(false)
-let textInterval = null
 
 const startSequence = () => {
   if (!audioPlayer.value) return
@@ -72,29 +75,27 @@ const startSequence = () => {
     }
   }, 200)
 
-  // Start Text Sync
-  processScript()
+  // Start with first line
+  nextLine()
 }
 
-const processScript = () => {
-  if (textInterval) clearInterval(textInterval)
-  
-  textInterval = setInterval(() => {
-    const currentTime = audioPlayer.value.currentTime
+const nextLine = () => {
+  if (ended.value) return
+
+  if (currentLineIndex.value < props.script.length - 1) {
+    // Fade out old
+    showText.value = false
     
-    // Find active line
-    // We want the latest line where start <= currentTime
-    const activeLine = [...props.script].reverse().find(line => line.start <= currentTime)
-    
-    if (activeLine && activeLine.text !== currentText.value) {
-      // Change text with fade
-      showText.value = false
-      setTimeout(() => {
-        currentText.value = activeLine.text
-        showText.value = true
-      }, 1000) // Wait for fade out
-    }
-  }, 100)
+    setTimeout(() => {
+      currentLineIndex.value++
+      currentText.value = props.script[currentLineIndex.value]
+      showText.value = true
+    }, 500)
+  } else {
+    // End
+    ended.value = true
+    emit('complete')
+  }
 }
 
 const stopSequence = () => {
@@ -109,17 +110,19 @@ const stopSequence = () => {
       }
     }, 200)
   }
-  if (textInterval) clearInterval(textInterval)
-}
-
-const onAudioEnded = () => {
-  ended.value = true
-  emit('complete')
 }
 
 const replay = () => {
   ended.value = false
+  currentLineIndex.value = -1
   startSequence()
+}
+
+const handleKeydown = (e) => {
+  if (!props.isActive) return
+  if (e.key === 'ArrowDown') {
+    nextLine()
+  }
 }
 
 watch(() => props.isActive, (active) => {
@@ -130,7 +133,12 @@ watch(() => props.isActive, (active) => {
   }
 })
 
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
 onUnmounted(() => {
   stopSequence()
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>

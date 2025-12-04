@@ -132,16 +132,17 @@ const scenes = ref([
     component: shallowRef(EndScene), 
     props: { 
       src: 'https://picsum.photos/id/15/1920/1080', 
-      // Placeholder for sad/melancholy music
-      // User should replace this with a local file in public/ or a valid URL
-      audioSrc: 'https://cdn.pixabay.com/download/audio/2022/02/07/audio_13b6329754.mp3?filename=sad-piano-110854.mp3', 
+      // Place your audio file in public/music/ending.mp3
+      audioSrc: '/music/ending.mp3', 
       script: [
-        { start: 0, text: "Finally, clarity." },
-        { start: 4, text: "The noise of the world fades away." },
-        { start: 9, text: "I realized I wasn't just tired..." },
-        { start: 14, text: "I was searching for something." },
-        { start: 19, text: "And in the silence..." },
-        { start: 24, text: "I found it." }
+        "The city rush, a blur of grey,",
+        "A stumble in the alleyway.",
+        "Words unspoken, lost in air,",
+        "A heavy gaze, a vacant stare.",
+        "But through the noise, a silence grew,",
+        "A clarity I never knew.",
+        "The journey ends, the morning breaks,",
+        "A brand new path, the dreamer wakes."
       ]
     },
     isGame: false,
