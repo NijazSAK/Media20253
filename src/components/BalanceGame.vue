@@ -164,7 +164,7 @@ watch(() => props.isActive, (newVal) => {
 
 const startPush = (direction) => {
   if (gameState.value !== 'playing') return
-  pushForce.value = direction * 1.5
+  pushForce.value = direction * 0.6
 }
 
 const stopPush = () => {
