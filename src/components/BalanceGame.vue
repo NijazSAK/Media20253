@@ -2,7 +2,7 @@
   <div class="balance-game relative w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden perspective-container">
     
     <!-- Alleyway Background -->
-    <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
       <!-- Sky/Night -->
       <div class="absolute top-0 w-full h-1/2 bg-gradient-to-b from-slate-900 to-slate-800"></div>
       <!-- Ground -->
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Game Layer -->
-    <div class="relative w-full h-full max-w-4xl mx-auto flex items-center justify-center perspective-view">
+    <div class="relative w-full h-full max-w-4xl mx-auto flex items-center justify-center perspective-view transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
       
       <!-- Character Container (Scales as they walk away) -->
       <div 
@@ -33,9 +33,7 @@
         <!-- Stick Figure -->
         <div class="relative w-20 h-48 flex flex-col items-center">
           <!-- Head -->
-          <div class="w-12 h-12 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] relative z-10">
-            <!-- Eyes (back of head, maybe slight profile?) -->
-          </div>
+          <div class="w-12 h-12 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] relative z-10"></div>
           
           <!-- Body -->
           <div class="w-2 h-24 bg-white rounded-full -mt-1 relative z-0"></div>
@@ -48,10 +46,18 @@
 
           <!-- Legs (Walking Animation) -->
           <div class="absolute bottom-0 w-full h-24">
-            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-left"></div>
-            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-right"></div>
+            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-left" :class="{ 'paused': gameState !== 'playing' }"></div>
+            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-right" :class="{ 'paused': gameState !== 'playing' }"></div>
           </div>
         </div>
+      </div>
+
+      <!-- Countdown Overlay -->
+      <div v-if="gameState === 'countdown'" class="absolute inset-0 flex items-center justify-center z-50">
+        <div class="text-9xl font-bold text-white animate-pulse drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+          {{ countdown }}
+        </div>
+        <div class="absolute bottom-1/4 text-white/70 text-xl tracking-widest uppercase">Get Ready...</div>
       </div>
 
       <!-- Fall Message -->
@@ -62,7 +68,7 @@
     </div>
 
     <!-- UI / Controls -->
-    <div class="absolute bottom-8 w-full flex flex-col items-center gap-4 z-50">
+    <div class="absolute bottom-8 w-full flex flex-col items-center gap-4 z-50 transition-opacity duration-500" :class="{ 'opacity-100': gameState === 'playing', 'opacity-0': gameState !== 'playing' }">
       <div class="w-64 h-2 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
         <div class="h-full bg-green-500 transition-all duration-300" :style="{ width: `${progress * 100}%` }"></div>
       </div>
@@ -74,7 +80,7 @@
     </div>
 
     <!-- Touch Controls Overlay -->
-    <div class="absolute inset-0 flex z-40">
+    <div v-if="gameState === 'playing'" class="absolute inset-0 flex z-40">
       <div 
         class="w-1/2 h-full active:bg-white/5 transition-colors"
         @touchstart.prevent="startPush(-1)"
@@ -97,7 +103,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+
+const props = defineProps({
+  isActive: Boolean
+})
 
 const emit = defineEmits(['complete'])
 
@@ -106,6 +116,8 @@ const velocity = ref(0)
 const pushForce = ref(0)
 const progress = ref(0) // 0 to 1
 const isFallen = ref(false)
+const gameState = ref('idle') // idle, countdown, playing, ended
+const countdown = ref(5)
 
 // Game Config
 const walkSpeed = 0.0015 // Progress per frame
@@ -114,8 +126,44 @@ const drunkNoise = 0.3 // Random force magnitude
 
 let gameLoop = null
 let lastTime = 0
+let countdownTimer = null
+
+const startGameSequence = () => {
+  // Reset
+  tilt.value = 0
+  velocity.value = 0
+  pushForce.value = 0
+  progress.value = 0
+  isFallen.value = false
+  gameState.value = 'countdown'
+  countdown.value = 5
+  
+  // Countdown Loop
+  if (countdownTimer) clearInterval(countdownTimer)
+  countdownTimer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(countdownTimer)
+      gameState.value = 'playing'
+      lastTime = 0
+      gameLoop = requestAnimationFrame(update)
+    }
+  }, 1000)
+}
+
+watch(() => props.isActive, (newVal) => {
+  if (newVal) {
+    startGameSequence()
+  } else {
+    // Pause/Reset if navigated away
+    gameState.value = 'idle'
+    if (gameLoop) cancelAnimationFrame(gameLoop)
+    if (countdownTimer) clearInterval(countdownTimer)
+  }
+}, { immediate: true })
 
 const startPush = (direction) => {
+  if (gameState.value !== 'playing') return
   pushForce.value = direction * 1.5
 }
 
@@ -124,7 +172,8 @@ const stopPush = () => {
 }
 
 const update = (timestamp) => {
-  if (isFallen.value) return
+  if (gameState.value !== 'playing') return
+  
   if (!lastTime) lastTime = timestamp
   const dt = (timestamp - lastTime) / 16
   lastTime = timestamp
@@ -162,6 +211,7 @@ const update = (timestamp) => {
 
 const handleFail = () => {
   isFallen.value = true
+  gameState.value = 'ended'
   cancelAnimationFrame(gameLoop)
   setTimeout(() => {
     emit('complete', { success: false })
@@ -169,11 +219,13 @@ const handleFail = () => {
 }
 
 const handleSuccess = () => {
+  gameState.value = 'ended'
   cancelAnimationFrame(gameLoop)
   emit('complete', { success: true })
 }
 
 const handleKeydown = (e) => {
+  if (gameState.value !== 'playing') return
   if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') startPush(-1)
   if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') startPush(1)
 }
@@ -185,13 +237,13 @@ const handleKeyup = (e) => {
 }
 
 onMounted(() => {
-  gameLoop = requestAnimationFrame(update)
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('keyup', handleKeyup)
 })
 
 onUnmounted(() => {
-  cancelAnimationFrame(gameLoop)
+  if (gameLoop) cancelAnimationFrame(gameLoop)
+  if (countdownTimer) clearInterval(countdownTimer)
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('keyup', handleKeyup)
 })
@@ -221,6 +273,10 @@ onUnmounted(() => {
 .animate-walk-right {
   animation: walkRight 1s infinite ease-in-out;
   animation-delay: 0.5s;
+}
+
+.paused {
+  animation-play-state: paused;
 }
 
 .animate-fade-in {
