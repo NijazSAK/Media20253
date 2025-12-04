@@ -48,6 +48,7 @@ import Scene from './components/Scene.vue'
 import BalanceGame from './components/BalanceGame.vue'
 import LanguageGame from './components/LanguageGame.vue'
 import WakeUpGame from './components/WakeUpGame.vue'
+import EndScene from './components/EndScene.vue'
 
 // Scene Configuration
 const scenes = ref([
@@ -128,8 +129,21 @@ const scenes = ref([
     completed: false 
   },
   { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/15/1920/1080', caption: 'Finally, clarity.' },
+    component: shallowRef(EndScene), 
+    props: { 
+      src: 'https://picsum.photos/id/15/1920/1080', 
+      // Placeholder for sad/melancholy music
+      // User should replace this with a local file in public/ or a valid URL
+      audioSrc: 'https://cdn.pixabay.com/download/audio/2022/02/07/audio_13b6329754.mp3?filename=sad-piano-110854.mp3', 
+      script: [
+        { start: 0, text: "Finally, clarity." },
+        { start: 4, text: "The noise of the world fades away." },
+        { start: 9, text: "I realized I wasn't just tired..." },
+        { start: 14, text: "I was searching for something." },
+        { start: 19, text: "And in the silence..." },
+        { start: 24, text: "I found it." }
+      ]
+    },
     isGame: false,
     completed: false
   }
