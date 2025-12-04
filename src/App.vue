@@ -22,13 +22,14 @@
           @complete="unlockScene(index)"
         />
 
-        <!-- Lock Overlay for Games -->
-        <div 
+      <!-- Skip Button -->
+        <button 
           v-if="scene.isGame && !scene.completed" 
-          class="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-xs uppercase tracking-widest backdrop-blur-sm"
+          @click="unlockScene(index)"
+          class="absolute top-4 right-4 z-50 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-600 font-mono text-sm backdrop-blur-sm"
         >
-          Locked
-        </div>
+          SKIP [S]
+        </button>
         
         <!-- Navigation Hint -->
         <div 
@@ -150,6 +151,12 @@ const attemptNavigation = (direction) => {
     // Shake effect or visual feedback could go here
     return
   }
+
+  const newIndex = currentSceneIndex.value + direction
+  if (newIndex >= 0 && newIndex < scenes.value.length) {
+    currentSceneIndex.value = newIndex
+  }
+}
 
 const handleKeydown = (e) => {
   // Skip Game Cheat

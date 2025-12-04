@@ -21,14 +21,21 @@
       <div class="absolute top-0 w-full h-4 bg-gradient-to-b from-transparent to-black opacity-50"></div>
     </div>
 
-    <!-- Instructions -->
-    <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+    <!-- Instructions & Controls -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
       <h2 
         v-if="openness < 80" 
-        class="text-white text-4xl font-bold opacity-50 animate-pulse"
+        class="text-white text-4xl font-bold opacity-50 animate-pulse mb-8"
       >
-        TAP TO WAKE UP
+        WAKE UP!
       </h2>
+      
+      <button
+        @click.stop="handleClick"
+        class="pointer-events-auto px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 rounded-full text-white font-bold tracking-widest hover:bg-white/20 active:scale-95 transition-all"
+      >
+        TAP REPEATEDLY
+      </button>
     </div>
   </div>
 </template>
