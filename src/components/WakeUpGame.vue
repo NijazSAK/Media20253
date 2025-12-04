@@ -5,13 +5,21 @@
     <div class="absolute inset-0 flex">
       <!-- Opponent Side (Top-Left) -->
       <div class="w-full h-full relative bg-amber-200 overflow-hidden clip-diagonal-top">
-        <div class="absolute bottom-10 right-20 flex flex-col items-center">
+        <div class="absolute bottom-20 right-32 flex flex-col items-center transform scale-125">
           <!-- Opponent Face -->
-          <div class="w-40 h-40 bg-white rounded-full border-4 border-black relative">
-            <div class="absolute top-12 left-8 w-4 h-4 bg-black rounded-full" :class="{ 'scale-y-0': opponentBlinked }"></div>
-            <div class="absolute top-12 right-8 w-4 h-4 bg-black rounded-full" :class="{ 'scale-y-0': opponentBlinked }"></div>
+          <div class="w-40 h-40 bg-white rounded-full border-4 border-black relative overflow-hidden">
+            <!-- Eyes -->
+            <div class="absolute top-12 left-8 w-4 h-4 bg-black rounded-full"></div>
+            <div class="absolute top-12 right-8 w-4 h-4 bg-black rounded-full"></div>
+            <!-- Eyelids (Struggle Animation) -->
+            <div class="absolute top-0 left-0 w-full bg-amber-200 z-10 transition-all duration-100" 
+                 :class="{ 'animate-struggle': isPlaying && !opponentBlinked, 'h-1/2': opponentBlinked, 'h-0': !opponentBlinked && !isPlaying }"></div>
+            
+            <!-- Mouth -->
             <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-black rounded-full"></div>
-            <!-- Sweat drop if losing? -->
+            
+            <!-- Sweat -->
+            <div v-if="isPlaying" class="absolute top-4 right-8 text-blue-400 text-2xl animate-bounce">💧</div>
           </div>
           <div class="w-1 h-20 bg-black"></div>
         </div>
@@ -19,11 +27,17 @@
 
       <!-- Player Side (Bottom-Right) -->
       <div class="absolute inset-0 w-full h-full bg-blue-100 clip-diagonal-bottom pointer-events-none">
-        <div class="absolute top-10 left-20 flex flex-col items-center">
+        <div class="absolute top-20 left-32 flex flex-col items-center transform scale-125">
            <!-- Player Face -->
-           <div class="w-40 h-40 bg-white rounded-full border-4 border-black relative">
-            <div class="absolute top-12 left-8 w-4 h-4 bg-black rounded-full transition-transform duration-100" :class="{ 'scale-y-0': playerBlinked }"></div>
-            <div class="absolute top-12 right-8 w-4 h-4 bg-black rounded-full transition-transform duration-100" :class="{ 'scale-y-0': playerBlinked }"></div>
+           <div class="w-40 h-40 bg-white rounded-full border-4 border-black relative overflow-hidden">
+            <!-- Eyes -->
+            <div class="absolute top-12 left-8 w-4 h-4 bg-black rounded-full"></div>
+            <div class="absolute top-12 right-8 w-4 h-4 bg-black rounded-full"></div>
+            <!-- Eyelids (Struggle Animation) -->
+            <div class="absolute top-0 left-0 w-full bg-blue-100 z-10 transition-all duration-100"
+                 :class="{ 'animate-struggle': isPlaying && !playerBlinked, 'h-1/2': playerBlinked, 'h-0': !playerBlinked && !isPlaying }"></div>
+
+            <!-- Mouth -->
             <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-black rounded-full"></div>
           </div>
           <div class="w-1 h-20 bg-black"></div>
@@ -41,10 +55,15 @@
     <!-- Piano Tiles Layer -->
     <div class="absolute inset-0 flex justify-center z-20">
       <div class="w-full max-w-md h-full relative flex">
+        
+        <!-- Hit Line -->
+        <div class="absolute top-[85%] w-full h-1 bg-red-500 shadow-[0_0_10px_rgba(255,0,0,0.8)] z-0"></div>
+        <div class="absolute top-[85%] right-full mr-4 text-white font-bold text-sm whitespace-nowrap">HIT HERE &rarr;</div>
+
         <!-- 4 Columns -->
         <div v-for="col in 4" :key="col" class="flex-1 h-full border-r border-white/10 relative group">
           <!-- Hit Zone Indicator -->
-          <div class="absolute bottom-0 w-full h-32 bg-gradient-to-t from-green-500/20 to-transparent opacity-0 transition-opacity duration-100" :class="{ 'opacity-100': activeKey === col }"></div>
+          <div class="absolute top-[75%] bottom-0 w-full bg-gradient-to-b from-transparent via-white/10 to-transparent opacity-0 transition-opacity duration-100" :class="{ 'opacity-100': activeKey === col }"></div>
           
           <!-- Key Hint -->
           <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white/50 font-bold text-xl">
@@ -56,11 +75,12 @@
         <div 
           v-for="tile in tiles" 
           :key="tile.id"
-          class="absolute w-[25%] h-32 bg-black rounded-md cursor-pointer hover:bg-slate-800 active:bg-slate-700 transition-colors border-2 border-white/20"
+          class="absolute w-[25%] h-32 bg-black rounded-md cursor-pointer hover:bg-slate-800 active:bg-slate-700 transition-colors border-2 border-white/20 z-10"
           :style="{ 
             left: `${(tile.col - 1) * 25}%`, 
             top: `${tile.y}%`,
-            opacity: tile.hit ? 0 : 1
+            opacity: tile.hit ? 0 : 1,
+            borderColor: tile.hit ? '#4ade80' : 'rgba(255,255,255,0.2)'
           }"
           @mousedown="hitTile(tile)"
           @touchstart.prevent="hitTile(tile)"
@@ -71,7 +91,9 @@
     <!-- UI Overlay -->
     <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 flex flex-col items-center">
       <div class="text-4xl font-bold text-slate-800 drop-shadow-md">{{ timeLeft.toFixed(1) }}s</div>
-      <div class="text-sm font-bold text-slate-600 uppercase tracking-widest">Don't Blink!</div>
+      <div class="text-sm font-bold text-slate-800 uppercase tracking-widest bg-white/80 px-4 py-1 rounded-full backdrop-blur-sm shadow-sm">
+        Hit tiles on the line!
+      </div>
     </div>
 
     <!-- Fail Overlay -->
@@ -100,8 +122,10 @@ const opponentBlinked = ref(false)
 const activeKey = ref(null)
 
 // Config
-const spawnRate = 600 // ms
-const fallSpeed = 0.6 // % per frame
+const spawnRate = 500 // ms
+const fallSpeed = 0.8 // % per frame
+const hitLineY = 85 // %
+const hitTolerance = 12 // % +/-
 let gameLoop = null
 let spawner = null
 let tileIdCounter = 0
@@ -164,14 +188,14 @@ const update = () => {
     if (tile.hit) return
     tile.y += fallSpeed
     
-    // Miss Condition
-    if (tile.y > 100) {
+    // Miss Condition (Passed the line + tolerance)
+    if (tile.y > hitLineY + hitTolerance && !tile.hit) {
       handleFail()
     }
   })
 
   // Cleanup
-  tiles.value = tiles.value.filter(t => t.y < 120 && !(t.hit && t.y > 100)) // Keep hit tiles briefly? No just hide them
+  tiles.value = tiles.value.filter(t => t.y < 120)
 
   gameLoop = requestAnimationFrame(update)
 }
@@ -179,13 +203,25 @@ const update = () => {
 const hitTile = (tile) => {
   if (!isPlaying.value || tile.hit) return
   
-  // Check if tile is in hit zone (e.g., bottom 30%)
-  // Actually standard piano tiles allows hitting anywhere usually, but let's say it has to be on screen
-  tile.hit = true
+  // Check Hit Zone
+  const dist = Math.abs(tile.y + 10 - hitLineY) // +10 to center hit on tile roughly (tile is 32px height, % is tricky, let's approx)
+  // Actually tile.y is top. Tile height is 32px (fixed) or %? 
+  // In template: h-32 (8rem). Screen height varies.
+  // Let's use simple logic: if tile top is within range [hitLineY - 20, hitLineY + 5]
   
-  // Visual feedback
-  activeKey.value = tile.col
-  setTimeout(() => activeKey.value = null, 100)
+  // Let's be generous: if tile overlaps line.
+  // Tile top: tile.y. Tile bottom: tile.y + ~15 (approx 15% height).
+  // Line: 85.
+  // Hit if tile.y > 70 && tile.y < 90
+  
+  if (tile.y > (hitLineY - 20) && tile.y < (hitLineY + 5)) {
+    tile.hit = true
+    activeKey.value = tile.col
+    setTimeout(() => activeKey.value = null, 100)
+  } else {
+    // Missed click (too early/late)
+    // Optional: Penalty?
+  }
 }
 
 const handleInput = (col) => {
@@ -194,17 +230,13 @@ const handleInput = (col) => {
   activeKey.value = col
   setTimeout(() => activeKey.value = null, 100)
 
-  // Find lowest unhit tile in column
+  // Find lowest unhit tile in column that is in range
   const target = tiles.value
-    .filter(t => t.col === col && !t.hit)
+    .filter(t => t.col === col && !t.hit && t.y > (hitLineY - 20) && t.y < (hitLineY + 5))
     .sort((a, b) => b.y - a.y)[0] // Lowest first
 
   if (target) {
-    // Check accuracy? For now just hit it
     target.hit = true
-  } else {
-    // Penalty for tapping empty lane? 
-    // Maybe slight blink flicker?
   }
 }
 
@@ -212,8 +244,6 @@ const handleFail = () => {
   playerBlinked.value = true
   stopGame()
   setTimeout(() => {
-    // Retry logic? Or just fail scene?
-    // Let's restart for now or emit fail
     resetGame()
     startGame() 
   }, 1500)
@@ -251,5 +281,21 @@ onUnmounted(() => {
 }
 .clip-diagonal-bottom {
   clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.animate-struggle {
+  animation: struggle 2s infinite;
+}
+
+@keyframes struggle {
+  0%, 100% { height: 0%; }
+  5% { height: 40%; }
+  10% { height: 0%; }
+  40% { height: 0%; }
+  45% { height: 30%; }
+  50% { height: 0%; }
+  80% { height: 0%; }
+  82% { height: 20%; }
+  84% { height: 0%; }
 }
 </style>
