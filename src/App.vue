@@ -129,18 +129,36 @@ const scenes = ref([
     completed: false 
   },
   { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/64/1920/1080', caption: '"You weren\'t cut out for this," he scoffed, walking past me.' },
+    isGame: false,
+    completed: false
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/55/1920/1080', caption: '"WAIT! HOW DID YOU DO THAT!?" I screamed, desperate.' },
+    isGame: false,
+    completed: false
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/225/1920/1080', caption: 'He turned, holding up a package. "10-minute ready meal."' },
+    isGame: false,
+    completed: false
+  },
+  { 
     component: shallowRef(EndScene), 
     props: { 
-      // Flashback Sequence (8 images for 8 lines)
+      // Flashback Sequence (Ad Montage)
       src: [
-        'https://picsum.photos/id/43/1920/1080',  // City (Start)
+        'https://picsum.photos/id/43/1920/1080',  // City
         'https://picsum.photos/id/11/1920/1080',  // Balance
         'https://picsum.photos/id/12/1920/1080',  // Confusion
         'https://picsum.photos/id/13/1920/1080',  // Exhaustion
         'https://picsum.photos/id/14/1920/1080',  // Struggle
         'https://picsum.photos/id/15/1920/1080',  // Clarity
-        'https://picsum.photos/id/28/1920/1080',  // Forest/Nature
-        'https://picsum.photos/id/29/1920/1080'   // Sunrise/New Path
+        'https://picsum.photos/id/292/1920/1080', // Food/Meal
+        'https://picsum.photos/id/88/1920/1080'   // Slogan/Logo Background
       ],
       // Place your audio file in public/music/ending.mp3
       audioSrc: '/music/ending.mp3', 
@@ -151,8 +169,8 @@ const scenes = ref([
         "A heavy gaze, a vacant stare.",
         "But through the noise, a silence grew,",
         "A clarity I never knew.",
-        "The journey ends, the morning breaks,",
-        "A brand new path, the dreamer wakes."
+        "Fuel your day, the easy way.",
+        "StickBurger 10-Minute Meals. Ready when you are." // Slogan
       ]
     },
     isGame: false,
