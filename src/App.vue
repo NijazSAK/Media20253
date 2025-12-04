@@ -19,13 +19,13 @@
         <component 
           :is="scene.component" 
           v-bind="scene.props" 
-          @complete="unlockScene(index)"
+          @complete="unlockScene(index, $event)"
         />
 
-      <!-- Skip Button -->
+        <!-- Skip Button -->
         <button 
           v-if="scene.isGame && !scene.completed" 
-          @click="unlockScene(index)"
+          @click="unlockScene(index, { success: true })"
           class="absolute top-4 right-4 z-50 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-600 font-mono text-sm backdrop-blur-sm"
         >
           SKIP [S]
@@ -106,8 +106,18 @@ const currentSceneIndex = ref(0)
 const isScrolling = ref(false)
 
 // Unlock Logic
-const unlockScene = (index) => {
+const unlockScene = (index, payload) => {
   scenes.value[index].completed = true
+  
+  // Handle Balance Game Outcome (Index 2)
+  if (index === 2 && scenes.value[3]) {
+    if (payload && payload.success === false) {
+      scenes.value[3].props.caption = "I stumbled and fell, but I had to keep moving."
+    } else {
+      scenes.value[3].props.caption = "I made it through the alley, steady on my feet."
+    }
+  }
+
   // Auto advance after a brief delay for satisfaction
   setTimeout(() => {
     if (currentSceneIndex.value < scenes.value.length - 1) {
