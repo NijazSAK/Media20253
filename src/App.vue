@@ -53,6 +53,7 @@ import EndScene from './components/EndScene.vue'
 import IntroScene from './components/IntroScene.vue'
 import introImage from './assets/intro-scene.jpg'
 import introImage2 from './assets/intro-scene-2.jpg'
+import introImage3 from './assets/intro-scene-3.jpg'
 
 // Scene Configuration
 const scenes = ref([
@@ -60,8 +61,9 @@ const scenes = ref([
     component: shallowRef(IntroScene),
     props: {
       slides: [
-        { src: introImage, caption: 'Again... I lie...', duration: 5000 },
-        { src: introImage2, caption: 'When can I stop...', duration: 5000 }
+        { src: introImage, caption: 'Again... I lie...', duration: 3000 },
+        { src: introImage2, caption: 'When can I stop...', duration: 3000 },
+        { src: introImage3, caption: '...', duration: 3000 }
       ]
     },
     isGame: false,
