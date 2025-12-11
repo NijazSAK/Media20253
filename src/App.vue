@@ -4,12 +4,14 @@
     <div class="w-full h-full relative">
       
       <!-- Current Scene -->
-      <component 
-        :is="scenes[currentSceneIndex].component" 
-        v-bind="scenes[currentSceneIndex].props" 
-        :isActive="true"
-        @complete="unlockScene(currentSceneIndex, $event)"
-      />
+      <transition name="fade" mode="out-in">
+        <component 
+          :is="scenes[currentSceneIndex].component" 
+          v-bind="scenes[currentSceneIndex].props" 
+          :isActive="true"
+          @complete="unlockScene(currentSceneIndex, $event)"
+        />
+      </transition>
 
       <!-- Skip Button (Global Overlay) -->
       <button 
@@ -42,9 +44,9 @@ import WakeUpGame from './components/WakeUpGame.vue'
 import EndScene from './components/EndScene.vue'
 
 import IntroScene from './components/IntroScene.vue'
-import introImage from './assets/intro-scene.jpg'
-import introImage2 from './assets/intro-scene-2.jpg'
-import introImage3 from './assets/intro-scene-3.jpg'
+import introImage1 from './assets/intro-1.png'
+import introImage2 from './assets/intro-2.png'
+import introImage3 from './assets/intro-3.png'
 
 import balanceBg1 from './assets/balance-bg-1.jpg'
 import balanceBg2 from './assets/balance-bg-2.jpg'
@@ -60,7 +62,7 @@ const scenes = ref([
     component: shallowRef(IntroScene),
     props: {
       slides: [
-        { src: introImage, caption: 'Again... I lie...', duration: 3000 },
+        { src: introImage1, caption: 'Again... I lie...', duration: 3000 },
         { src: introImage2, caption: 'When can I stop...', duration: 3000 },
         { src: introImage3, caption: '...', duration: 3000 }
       ]
@@ -244,7 +246,7 @@ body, html {
 /* Global Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.1s ease;
+  transition: opacity 0.5s ease;
 }
 
 .fade-enter-from,

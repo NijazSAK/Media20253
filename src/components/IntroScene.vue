@@ -8,19 +8,21 @@
       </div>
     </div>
 
-    <div v-if="hasStarted" :key="currentIndex" class="absolute inset-0 w-full h-full">
-      <img 
-        :src="currentSlide.src" 
-        class="w-full h-full object-cover opacity-80"
-        alt="Intro Scene"
-      />
-      <div class="absolute inset-0 bg-black/40"></div>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <h1 class="text-4xl md:text-6xl font-bold text-white tracking-widest uppercase drop-shadow-2xl text-center px-4 animate-pulse">
-          {{ currentSlide.caption }}
-        </h1>
+    <transition name="fade" mode="out-in">
+      <div v-if="hasStarted" :key="currentIndex" class="absolute inset-0 w-full h-full">
+        <img 
+          :src="currentSlide.src" 
+          class="w-full h-full object-cover opacity-80"
+          alt="Intro Scene"
+        />
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <h1 class="text-4xl md:text-6xl font-bold text-white tracking-widest uppercase drop-shadow-2xl text-center px-4 animate-pulse">
+            {{ currentSlide.caption }}
+          </h1>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -90,3 +92,14 @@ watch(() => props.isActive, (active) => {
 </script>
 
 
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
