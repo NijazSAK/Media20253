@@ -50,8 +50,20 @@ import LanguageGame from './components/LanguageGame.vue'
 import WakeUpGame from './components/WakeUpGame.vue'
 import EndScene from './components/EndScene.vue'
 
+import IntroScene from './components/IntroScene.vue'
+import introImage from './assets/intro-scene.jpg'
+
 // Scene Configuration
 const scenes = ref([
+  {
+    component: shallowRef(IntroScene),
+    props: {
+      src: introImage,
+      caption: 'Again... I lie...'
+    },
+    isGame: false,
+    completed: false
+  },
   { 
     component: shallowRef(Scene), 
     // Quick shots of city life
