@@ -33,7 +33,7 @@
       <div 
         class="character-rig absolute bottom-10 transition-transform duration-100 ease-linear"
         :style="{ 
-          transform: `scale(${1 - (progress * 0.3)}) translateY(${-progress * 50}px) rotate(${tilt}deg)`,
+          transform: `scale(${1 - (progress * 0.3)}) translateY(${-progress * 50}px) rotate(${tilt * 0.5}deg)`,
           opacity: isFallen ? 0 : 1
         }"
       >
@@ -43,20 +43,24 @@
         </div>
       </div>
 
-      <!-- Balance Bar Indicator -->
-      <div v-if="gameState === 'playing'" class="absolute top-24 w-64 h-4 bg-slate-800/80 rounded-full border border-slate-600 overflow-hidden backdrop-blur-sm">
-        <!-- Center Marker -->
-        <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/50 transform -translate-x-1/2 z-10"></div>
-        
-        <!-- Bar Fill -->
+      <!-- New Balance Bar UI -->
+      <div v-if="gameState === 'playing'" class="absolute top-24 w-96 h-6 bg-slate-900/90 rounded-full border-2 border-slate-600 overflow-hidden backdrop-blur-sm shadow-xl">
+        <!-- Left Bar (Fills from Left) -->
         <div 
-          class="h-full transition-all duration-75 ease-linear"
-          :class="tilt > 0 ? 'bg-red-500/80' : 'bg-blue-500/80'"
-          :style="{ 
-            width: `${Math.min(Math.abs(tilt) / maxTilt * 50, 50)}%`,
-            marginLeft: tilt > 0 ? '50%' : `calc(50% - ${Math.min(Math.abs(tilt) / maxTilt * 50, 50)}%)`
-          }"
+          v-if="tilt < 0"
+          class="absolute left-0 top-0 bottom-0 bg-gradient-to-r from-red-600 to-red-400 transition-all duration-75 ease-linear"
+          :style="{ width: `${Math.min(Math.abs(tilt), 100)}%` }"
         ></div>
+
+        <!-- Right Bar (Fills from Right) -->
+        <div 
+          v-if="tilt > 0"
+          class="absolute right-0 top-0 bottom-0 bg-gradient-to-l from-red-600 to-red-400 transition-all duration-75 ease-linear"
+          :style="{ width: `${Math.min(Math.abs(tilt), 100)}%` }"
+        ></div>
+
+        <!-- Center Marker (Safe Zone) -->
+        <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/20 transform -translate-x-1/2"></div>
       </div>
 
       <!-- Countdown Overlay -->
@@ -80,9 +84,9 @@
         <div class="h-full bg-green-500 transition-all duration-300" :style="{ width: `${progress * 100}%` }"></div>
       </div>
       
-      <div class="flex gap-12 text-white/50 font-mono text-sm">
-        <span :class="{ 'text-white font-bold': pushForce < 0 }">&larr; LEFT</span>
-        <span :class="{ 'text-white font-bold': pushForce > 0 }">RIGHT &rarr;</span>
+      <div class="flex gap-24 text-white/50 font-mono text-lg font-bold tracking-wider">
+        <span :class="{ 'text-red-400 scale-110': tilt < 0, 'opacity-30': tilt > 0 }">&larr; PUSH</span>
+        <span :class="{ 'text-red-400 scale-110': tilt > 0, 'opacity-30': tilt < 0 }">PUSH &rarr;</span>
       </div>
     </div>
 
@@ -123,24 +127,24 @@ const props = defineProps({
 
 const emit = defineEmits(['complete'])
 
-const tilt = ref(0)
-const velocity = ref(0)
+const tilt = ref(0) // -100 to 100
 const pushForce = ref(0)
 const progress = ref(0) // 0 to 1
 const isFallen = ref(false)
-const gameState = ref('idle') // idle, countdown, playing, ended
+const gameState = ref('idle')
 const countdown = ref(3)
 
-// Game Config
-const walkSpeed = 0.0010 // Slower progress for tension
-const maxTilt = 45
-const drunkNoise = 0.2 
-const correctionForce = 1.5 // Constant force applied when key is held
-const friction = 0.90 // High friction for "direct" control feel
+// Game Config - Easier Settings
+const walkSpeed = 0.0015 // Faster progress so it ends sooner
+const maxTilt = 100
+const driftSpeed = 0.4 // Slow natural drift
+const correctionSpeed = 1.5 // Strong player correction
 
 let gameLoop = null
 let lastTime = 0
 let countdownTimer = null
+let driftDirection = 1 // 1 or -1
+let driftTimer = 0
 
 const currentBackgroundIndex = computed(() => {
   if (progress.value < 0.33) return 0
@@ -149,16 +153,14 @@ const currentBackgroundIndex = computed(() => {
 })
 
 const startGameSequence = () => {
-  // Reset
   tilt.value = 0
-  velocity.value = 0
   pushForce.value = 0
   progress.value = 0
   isFallen.value = false
   gameState.value = 'countdown'
   countdown.value = 3
+  driftDirection = Math.random() > 0.5 ? 1 : -1
   
-  // Countdown Loop
   if (countdownTimer) clearInterval(countdownTimer)
   countdownTimer = setInterval(() => {
     countdown.value--
@@ -175,7 +177,6 @@ watch(() => props.isActive, (newVal) => {
   if (newVal) {
     startGameSequence()
   } else {
-    // Pause/Reset if navigated away
     gameState.value = 'idle'
     if (gameLoop) cancelAnimationFrame(gameLoop)
     if (countdownTimer) clearInterval(countdownTimer)
@@ -184,8 +185,7 @@ watch(() => props.isActive, (newVal) => {
 
 const startPush = (direction) => {
   if (gameState.value !== 'playing') return
-  // Constant force, not additive
-  pushForce.value = direction * correctionForce
+  pushForce.value = direction
 }
 
 const stopPush = () => {
@@ -202,18 +202,49 @@ const update = (timestamp) => {
   // 1. Progress
   progress.value += walkSpeed * dt
 
-  // 2. Physics
-  const noise = (Math.random() - 0.5) * drunkNoise
-  const gravity = Math.sin(tilt.value * Math.PI / 180) * 0.3
+  // 2. Drift Logic
+  // Change drift direction occasionally
+  driftTimer += dt
+  if (driftTimer > 100) { // Every ~1.6 seconds
+    if (Math.random() > 0.5) driftDirection *= -1
+    driftTimer = 0
+  }
 
-  // Velocity update with high friction
-  velocity.value += (gravity + pushForce.value + noise) * dt
-  velocity.value *= friction
+  // Apply Drift (increases tilt away from 0)
+  // If tilt is 0, drift starts in driftDirection
+  // If tilt is already non-zero, drift tends to increase the error (instability)
+  let currentDrift = 0
+  if (tilt.value === 0) {
+    currentDrift = driftDirection * driftSpeed
+  } else {
+    // Drift tends to push further in the current direction of tilt
+    currentDrift = (tilt.value > 0 ? 1 : -1) * driftSpeed
+  }
 
-  tilt.value += velocity.value * dt
+  // 3. Player Correction
+  // If tilt is negative (Left bar), player must press Left (-1) to correct (add positive value? No, reduce magnitude)
+  // Wait, user said: "fills from left then press the left key"
+  // If Tilt < 0 (Left Bar), Pressing Left (-1) should REDUCE the bar (bring Tilt closer to 0).
+  // So if Tilt is -50, we want to add +Correction.
+  // If Tilt > 0 (Right Bar), Pressing Right (1) should REDUCE the bar (bring Tilt closer to 0).
+  // So if Tilt is 50, we want to add -Correction.
+  
+  let correction = 0
+  if (pushForce.value === -1 && tilt.value < 0) {
+    correction = correctionSpeed // Counteract negative tilt
+  } else if (pushForce.value === 1 && tilt.value > 0) {
+    correction = -correctionSpeed // Counteract positive tilt
+  }
 
-  // 3. Win/Lose Conditions
-  if (Math.abs(tilt.value) > maxTilt) {
+  // Apply changes
+  tilt.value += (currentDrift + correction) * dt
+
+  // Clamp tilt slightly to prevent instant flip-over if correction is too strong at 0
+  // Actually, if we cross 0, we should reset or switch sides smoothly.
+  // With current logic, if tilt is -1 and we add +5, it becomes +4. The bar switches sides. This is fine.
+
+  // 4. Win/Lose
+  if (Math.abs(tilt.value) >= maxTilt) {
     handleFail()
     return
   }
