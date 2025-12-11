@@ -8,43 +8,29 @@
           v-if="currentBackgroundIndex === 0" 
           key="bg1"
           :src="backgrounds[0]" 
-          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         />
         <img 
           v-if="currentBackgroundIndex === 1" 
           key="bg2"
           :src="backgrounds[1]" 
-          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         />
         <img 
           v-if="currentBackgroundIndex === 2" 
           key="bg3"
           :src="backgrounds[2]" 
-          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
         />
       </transition-group>
       <div class="absolute inset-0 bg-black/30"></div>
     </div>
 
     <!-- Game Layer -->
-    <div class="relative w-full h-full max-w-4xl mx-auto flex items-center justify-center perspective-view transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
+    <div class="relative w-full h-full max-w-4xl mx-auto flex items-center justify-center perspective-view transition-opacity duration-500" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
       
-      <!-- Character/Table Container -->
-      <div 
-        class="character-rig absolute bottom-10 transition-transform duration-100 ease-linear"
-        :style="{ 
-          transform: `scale(${1 - (progress * 0.3)}) translateY(${-progress * 50}px) rotate(${tilt * 0.5}deg)`,
-          opacity: isFallen ? 0 : 1
-        }"
-      >
-        <!-- Table Sprite -->
-        <div class="relative w-48 h-48 flex flex-col items-center justify-end">
-           <img :src="tableSprite" class="w-full h-full object-contain drop-shadow-2xl" alt="Balance Object" />
-        </div>
-      </div>
-
-      <!-- New Balance Bar UI -->
-      <div v-if="gameState === 'playing'" class="absolute top-24 w-96 h-6 bg-slate-900/90 rounded-full border-2 border-slate-600 overflow-hidden backdrop-blur-sm shadow-xl">
+      <!-- Balance Bar UI (Moved to Bottom) -->
+      <div v-if="gameState === 'playing'" class="absolute bottom-40 w-96 h-6 bg-slate-900/90 rounded-full border-2 border-slate-600 overflow-hidden backdrop-blur-sm shadow-xl z-10">
         <!-- Left Bar (Fills from Left) -->
         <div 
           v-if="tilt < 0"
@@ -72,8 +58,10 @@
       </div>
 
       <!-- Fall Message -->
-      <div v-if="isFallen" class="absolute inset-0 flex items-center justify-center bg-black/80 z-50 animate-fade-in">
-        <h2 class="text-4xl font-bold text-red-500 tracking-widest uppercase">Spilled...</h2>
+      <div v-if="isFallen" class="absolute inset-0 flex items-center justify-center bg-black z-50 animate-fade-in">
+        <h2 class="text-5xl md:text-7xl font-bold text-red-600 tracking-widest uppercase drop-shadow-lg text-center px-4 animate-shake">
+          OWWW!<br>NOT AGAIN!!!
+        </h2>
       </div>
 
     </div>
@@ -115,7 +103,6 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import tableSprite from '../assets/table-sprite.png'
 
 const props = defineProps({
   isActive: Boolean,
@@ -203,32 +190,20 @@ const update = (timestamp) => {
   progress.value += walkSpeed * dt
 
   // 2. Drift Logic
-  // Change drift direction occasionally
   driftTimer += dt
   if (driftTimer > 100) { // Every ~1.6 seconds
     if (Math.random() > 0.5) driftDirection *= -1
     driftTimer = 0
   }
 
-  // Apply Drift (increases tilt away from 0)
-  // If tilt is 0, drift starts in driftDirection
-  // If tilt is already non-zero, drift tends to increase the error (instability)
   let currentDrift = 0
   if (tilt.value === 0) {
     currentDrift = driftDirection * driftSpeed
   } else {
-    // Drift tends to push further in the current direction of tilt
     currentDrift = (tilt.value > 0 ? 1 : -1) * driftSpeed
   }
 
   // 3. Player Correction
-  // If tilt is negative (Left bar), player must press Left (-1) to correct (add positive value? No, reduce magnitude)
-  // Wait, user said: "fills from left then press the left key"
-  // If Tilt < 0 (Left Bar), Pressing Left (-1) should REDUCE the bar (bring Tilt closer to 0).
-  // So if Tilt is -50, we want to add +Correction.
-  // If Tilt > 0 (Right Bar), Pressing Right (1) should REDUCE the bar (bring Tilt closer to 0).
-  // So if Tilt is 50, we want to add -Correction.
-  
   let correction = 0
   if (pushForce.value === -1 && tilt.value < 0) {
     correction = correctionSpeed // Counteract negative tilt
@@ -238,10 +213,6 @@ const update = (timestamp) => {
 
   // Apply changes
   tilt.value += (currentDrift + correction) * dt
-
-  // Clamp tilt slightly to prevent instant flip-over if correction is too strong at 0
-  // Actually, if we cross 0, we should reset or switch sides smoothly.
-  // With current logic, if tilt is -1 and we add +5, it becomes +4. The bar switches sides. This is fine.
 
   // 4. Win/Lose
   if (Math.abs(tilt.value) >= maxTilt) {
@@ -263,7 +234,7 @@ const handleFail = () => {
   cancelAnimationFrame(gameLoop)
   setTimeout(() => {
     emit('complete', { success: false })
-  }, 1500)
+  }, 2000) // Show fail screen for 2 seconds
 }
 
 const handleSuccess = () => {
@@ -306,16 +277,27 @@ onUnmounted(() => {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1s ease;
+  transition: opacity 0.5s ease;
 }
 
 .fade-enter-from,

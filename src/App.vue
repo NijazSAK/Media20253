@@ -59,6 +59,9 @@ import balanceBg1 from './assets/balance-bg-1.jpg'
 import balanceBg2 from './assets/balance-bg-2.jpg'
 import balanceBg3 from './assets/balance-bg-3.jpg'
 
+import BlackScreen from './components/BlackScreen.vue'
+import postGameImage from './assets/post-game-scene.jpg'
+
 // Scene Configuration
 const scenes = ref([
   {
@@ -80,6 +83,24 @@ const scenes = ref([
     }, 
     isGame: true,
     completed: false 
+  },
+  {
+    component: shallowRef(Scene),
+    props: {
+      src: postGameImage,
+      caption: '...'
+    },
+    isGame: false,
+    completed: false
+  },
+  {
+    component: shallowRef(BlackScreen),
+    props: {
+      caption: 'Homecooked would have been better...',
+      duration: 5000
+    },
+    isGame: false,
+    completed: false
   },
   { 
     component: shallowRef(Scene), 
