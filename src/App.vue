@@ -54,7 +54,7 @@ import balanceBg3 from './assets/balance-bg-3.jpg'
 
 import BlackScreen from './components/BlackScreen.vue'
 import orderingFoodBg from './assets/ordering-food-bg.png'
-import postGameImage from './assets/post-game-scene.jpg'
+import restaurantEntranceImage from './assets/restaurant-entrance.jpg'
 
 // Scene Configuration
 const scenes = ref([
@@ -82,7 +82,7 @@ const scenes = ref([
   {
     component: shallowRef(Scene),
     props: {
-      src: postGameImage,
+      src: restaurantEntranceImage,
       caption: '...',
       duration: 3000
     },
