@@ -82,7 +82,8 @@ const scenes = ref([
       backgrounds: [balanceBg1, balanceBg2, balanceBg3]
     }, 
     isGame: true,
-    completed: false 
+    completed: false,
+    autoAdvance: true
   },
   {
     component: shallowRef(Scene),
@@ -105,21 +106,6 @@ const scenes = ref([
     isGame: false,
     completed: false,
     autoAdvance: true
-  },
-  { 
-    component: shallowRef(Scene), 
-    // Disoriented shots
-    props: { 
-      src: [
-        'https://picsum.photos/id/12/1920/1080',
-        'https://picsum.photos/id/16/1920/1080',
-        'https://picsum.photos/id/20/1920/1080'
-      ],
-      caption: 'Words couldn\'t express the feeling.',
-      animationSpeed: 800
-    },
-    isGame: false,
-    completed: false
   },
   { 
     component: shallowRef(LanguageGame), 
@@ -259,5 +245,16 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden; /* Prevent native scroll */
+}
+
+/* Global Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
