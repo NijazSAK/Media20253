@@ -18,9 +18,9 @@ import { ref, computed, watch, onUnmounted } from 'vue'
 const props = defineProps({
   src: [String, Array],
   caption: String,
-  animationSpeed: {
+  duration: {
     type: Number,
-    default: 1000 // ms per frame
+    default: 1000
   },
   isActive: Boolean
 })
@@ -56,7 +56,7 @@ const startAnimation = () => {
     // Static image
     completionTimeout = setTimeout(() => {
       emit('complete')
-    }, 1000) // Brief pause for static scenes
+    }, props.duration)
   }
 }
 

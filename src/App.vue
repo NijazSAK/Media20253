@@ -88,19 +88,23 @@ const scenes = ref([
     component: shallowRef(Scene),
     props: {
       src: postGameImage,
-      caption: '...'
+      caption: '...',
+      duration: 3000
     },
     isGame: false,
-    completed: false
+    completed: false,
+    autoAdvance: true
   },
   {
     component: shallowRef(BlackScreen),
     props: {
       caption: 'Homecooked would have been better...',
-      duration: 5000
+      duration: 5000,
+      audioSrc: '/music/bell.mp3'
     },
     isGame: false,
-    completed: false
+    completed: false,
+    autoAdvance: true
   },
   { 
     component: shallowRef(Scene), 
@@ -207,13 +211,18 @@ const isScrolling = ref(false)
 const unlockScene = (index, payload) => {
   scenes.value[index].completed = true
   
-  // Handle Balance Game Outcome (Index 2)
-  if (index === 2 && scenes.value[3]) {
+  // Handle Balance Game Outcome (Index 1)
+  if (index === 1 && scenes.value[2]) {
     if (payload && payload.success === false) {
-      scenes.value[3].props.caption = "I stumbled and fell, but I had to keep moving."
+      // scenes.value[2].props.caption = "I stumbled and fell, but I had to keep moving."
     } else {
-      scenes.value[3].props.caption = "I made it through the alley, steady on my feet."
+      // scenes.value[2].props.caption = "I made it through the alley, steady on my feet."
     }
+  }
+
+  // Auto-advance if configured
+  if (scenes.value[index].autoAdvance && index < scenes.value.length - 1) {
+    currentSceneIndex.value++
   }
 }
 

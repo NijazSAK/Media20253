@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, watch } from 'vue'
+import { onMounted, onUnmounted, watch, ref } from 'vue'
 
 const props = defineProps({
   caption: String,
@@ -15,26 +15,42 @@ const props = defineProps({
     type: Number,
     default: 5000
   },
+  audioSrc: String,
   isActive: Boolean
 })
 
 const emit = defineEmits(['complete'])
 
 let timer = null
+const audio = ref(null)
 
-const startTimer = () => {
+const startSequence = () => {
   if (timer) clearTimeout(timer)
+  
+  if (props.audioSrc) {
+    audio.value = new Audio(props.audioSrc)
+    audio.value.play().catch(e => console.error("Audio play failed", e))
+  }
+
   timer = setTimeout(() => {
     emit('complete')
   }, props.duration)
 }
 
+const stopSequence = () => {
+  if (timer) clearTimeout(timer)
+  if (audio.value) {
+    audio.value.pause()
+    audio.value = null
+  }
+}
+
 watch(() => props.isActive, (active) => {
-  if (active) startTimer()
-  else if (timer) clearTimeout(timer)
+  if (active) startSequence()
+  else stopSequence()
 }, { immediate: true })
 
 onUnmounted(() => {
-  if (timer) clearTimeout(timer)
+  stopSequence()
 })
 </script>
