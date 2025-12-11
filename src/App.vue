@@ -1,43 +1,34 @@
 <template>
   <div class="app-container w-full h-screen overflow-hidden bg-slate-900 text-slate-200 font-sans">
-    <!-- Main Scroll Container -->
-    <div 
-      ref="container"
-      class="w-full h-full relative transition-transform duration-700 ease-in-out"
-      :style="{ transform: `translateY(-${currentSceneIndex * 100}%)` }"
-    >
-      <!-- Render Scenes -->
-      <div 
-        v-for="(scene, index) in scenes" 
-        :key="index"
-        class="w-full h-full relative"
-      >
-        <!-- Dynamic Component Rendering -->
-        <component 
-          :is="scene.component" 
-          v-bind="scene.props" 
-          :isActive="index === currentSceneIndex"
-          @complete="unlockScene(index, $event)"
-        />
+    <!-- Main Scene Container -->
+    <div class="w-full h-full relative">
+      
+      <!-- Current Scene -->
+      <component 
+        :is="scenes[currentSceneIndex].component" 
+        v-bind="scenes[currentSceneIndex].props" 
+        :isActive="true"
+        @complete="unlockScene(currentSceneIndex, $event)"
+      />
 
-        <!-- Skip Button -->
-        <button 
-          v-if="scene.isGame && !scene.completed" 
-          @click="unlockScene(index, { success: true })"
-          class="absolute top-4 right-4 z-50 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-600 font-mono text-sm backdrop-blur-sm"
-        >
-          SKIP [S]
-        </button>
-        
-        <!-- Navigation Hint -->
-        <div 
-          v-if="scene.completed && index < scenes.length - 1"
-          class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce flex flex-col items-center gap-2 opacity-80"
-        >
-          <span class="text-white text-sm font-mono tracking-widest uppercase bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">Press ↓</span>
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-        </div>
+      <!-- Skip Button (Global Overlay) -->
+      <button 
+        v-if="scenes[currentSceneIndex].isGame && !scenes[currentSceneIndex].completed" 
+        @click="unlockScene(currentSceneIndex, { success: true })"
+        class="absolute top-4 right-4 z-50 px-4 py-2 bg-slate-800/80 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-600 font-mono text-sm backdrop-blur-sm"
+      >
+        SKIP [S]
+      </button>
+      
+      <!-- Navigation Hint (Global Overlay) -->
+      <div 
+        v-if="scenes[currentSceneIndex].completed && currentSceneIndex < scenes.length - 1"
+        class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce flex flex-col items-center gap-2 opacity-80 z-50"
+      >
+        <span class="text-white text-sm font-mono tracking-widest uppercase bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm">Press ↓</span>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
       </div>
+
     </div>
   </div>
 </template>
@@ -60,6 +51,7 @@ import balanceBg2 from './assets/balance-bg-2.jpg'
 import balanceBg3 from './assets/balance-bg-3.jpg'
 
 import BlackScreen from './components/BlackScreen.vue'
+import orderingFoodBg from './assets/ordering-food-bg.png'
 import postGameImage from './assets/post-game-scene.jpg'
 
 // Scene Configuration
@@ -109,7 +101,9 @@ const scenes = ref([
   },
   { 
     component: shallowRef(LanguageGame), 
-    props: {}, 
+    props: {
+      backgroundImage: orderingFoodBg
+    }, 
     isGame: true,
     completed: false 
   },
