@@ -43,6 +43,22 @@
         </div>
       </div>
 
+      <!-- Balance Bar Indicator -->
+      <div v-if="gameState === 'playing'" class="absolute top-24 w-64 h-4 bg-slate-800/80 rounded-full border border-slate-600 overflow-hidden backdrop-blur-sm">
+        <!-- Center Marker -->
+        <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/50 transform -translate-x-1/2 z-10"></div>
+        
+        <!-- Bar Fill -->
+        <div 
+          class="h-full transition-all duration-75 ease-linear"
+          :class="tilt > 0 ? 'bg-red-500/80' : 'bg-blue-500/80'"
+          :style="{ 
+            width: `${Math.min(Math.abs(tilt) / maxTilt * 50, 50)}%`,
+            marginLeft: tilt > 0 ? '50%' : `calc(50% - ${Math.min(Math.abs(tilt) / maxTilt * 50, 50)}%)`
+          }"
+        ></div>
+      </div>
+
       <!-- Countdown Overlay -->
       <div v-if="gameState === 'countdown'" class="absolute inset-0 flex items-center justify-center z-50">
         <div class="text-9xl font-bold text-white animate-pulse drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
@@ -65,8 +81,8 @@
       </div>
       
       <div class="flex gap-12 text-white/50 font-mono text-sm">
-        <span>&larr; LEFT</span>
-        <span>RIGHT &rarr;</span>
+        <span :class="{ 'text-white font-bold': pushForce < 0 }">&larr; LEFT</span>
+        <span :class="{ 'text-white font-bold': pushForce > 0 }">RIGHT &rarr;</span>
       </div>
     </div>
 
@@ -119,6 +135,8 @@ const countdown = ref(3)
 const walkSpeed = 0.0010 // Slower progress for tension
 const maxTilt = 45
 const drunkNoise = 0.2 
+const correctionForce = 1.5 // Constant force applied when key is held
+const friction = 0.90 // High friction for "direct" control feel
 
 let gameLoop = null
 let lastTime = 0
@@ -166,7 +184,8 @@ watch(() => props.isActive, (newVal) => {
 
 const startPush = (direction) => {
   if (gameState.value !== 'playing') return
-  pushForce.value = direction * 0.5
+  // Constant force, not additive
+  pushForce.value = direction * correctionForce
 }
 
 const stopPush = () => {
@@ -187,8 +206,9 @@ const update = (timestamp) => {
   const noise = (Math.random() - 0.5) * drunkNoise
   const gravity = Math.sin(tilt.value * Math.PI / 180) * 0.3
 
+  // Velocity update with high friction
   velocity.value += (gravity + pushForce.value + noise) * dt
-  velocity.value *= 0.96 // Friction
+  velocity.value *= friction
 
   tilt.value += velocity.value * dt
 

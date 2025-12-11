@@ -1,7 +1,15 @@
 <template>
   <div class="intro-scene w-full h-full flex items-center justify-center bg-black relative overflow-hidden">
+    
+    <!-- Start Prompt -->
+    <div v-if="!hasStarted" class="absolute inset-0 flex flex-col items-center justify-center z-50">
+      <div class="animate-bounce text-white/50 font-mono tracking-widest uppercase text-sm">
+        Press &darr; to Start
+      </div>
+    </div>
+
     <transition name="fade" mode="in-out">
-      <div :key="currentIndex" class="absolute inset-0 w-full h-full">
+      <div v-if="hasStarted" :key="currentIndex" class="absolute inset-0 w-full h-full">
         <img 
           :src="currentSlide.src" 
           class="w-full h-full object-cover opacity-80"
@@ -19,13 +27,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   slides: {
     type: Array,
     required: true,
-    // Expected format: [{ src: string, caption: string, duration: number }]
   },
   isActive: Boolean
 })
@@ -33,10 +40,12 @@ const props = defineProps({
 const emit = defineEmits(['complete'])
 
 const currentIndex = ref(0)
+const hasStarted = ref(false)
 const currentSlide = computed(() => props.slides[currentIndex.value])
 let slideTimeout = null
 
 const startSequence = () => {
+  hasStarted.value = true
   clearTimeout(slideTimeout)
   currentIndex.value = 0
   scheduleNextSlide()
@@ -58,14 +67,28 @@ const scheduleNextSlide = () => {
 
 const stopSequence = () => {
   clearTimeout(slideTimeout)
+  hasStarted.value = false
 }
 
-watch(() => props.isActive, (active) => {
-  if (active) startSequence()
-  else stopSequence()
-}, { immediate: true })
+const handleKeydown = (e) => {
+  if (props.isActive && !hasStarted.value && e.key === 'ArrowDown') {
+    startSequence()
+  }
+}
 
-onUnmounted(stopSequence)
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  stopSequence()
+  window.removeEventListener('keydown', handleKeydown)
+})
+
+// Watch for deactivation to reset
+watch(() => props.isActive, (active) => {
+  if (!active) stopSequence()
+})
 </script>
 
 <style scoped>
