@@ -1,50 +1,31 @@
 <template>
-  <div class="language-game w-full h-full flex flex-col items-center justify-between bg-amber-50 p-8 relative overflow-hidden">
+  <div class="language-game w-full h-full flex flex-col items-center justify-between p-8 relative overflow-hidden">
     
     <!-- Custom Background -->
     <div v-if="backgroundImage" class="absolute inset-0 z-0">
-      <img :src="backgroundImage" class="w-full h-full object-cover opacity-30" />
-    </div>
-
-    <!-- Background / Counter -->
-    <div v-else class="absolute inset-0 bg-amber-100/50 pointer-events-none"></div>
-    <div class="absolute bottom-0 w-full h-1/3 bg-amber-200 border-t-4 border-amber-300 pointer-events-none"></div>
-
-    <!-- Clerk (Stick Figure) -->
-    <div class="relative mt-12 flex flex-col items-center">
-      <!-- Head -->
-      <div class="w-32 h-32 bg-white rounded-full border-4 border-black relative">
-        <div class="absolute top-10 left-8 w-3 h-3 bg-black rounded-full"></div>
-        <div class="absolute top-10 right-8 w-3 h-3 bg-black rounded-full"></div>
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-black rounded-full"></div>
-        <!-- Hat -->
-        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 w-40 h-12 bg-red-500 rounded-t-full border-b-4 border-red-700"></div>
-      </div>
-      <!-- Body -->
-      <div class="w-1 h-24 bg-black"></div>
-      <!-- Shoulders -->
-      <div class="w-48 h-1 bg-black -mt-20"></div>
+      <img :src="backgroundImage" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-black/20"></div>
     </div>
 
     <!-- Conversation Area -->
-    <div class="w-full max-w-2xl flex flex-col gap-8 z-10 mt-8">
+    <div class="w-full max-w-2xl flex flex-col gap-8 z-10 mt-32">
       
       <!-- Clerk Bubble (Left) -->
-      <div class="self-start bg-white p-6 rounded-2xl rounded-tl-none shadow-md border-2 border-gray-100 max-w-xs animate-fade-in-left">
+      <div class="self-start bg-white p-6 rounded-2xl rounded-tl-none shadow-md border-2 border-gray-100 max-w-xs animate-fade-in-left transition-all duration-100">
         <p class="text-lg font-medium text-gray-800">{{ currentStageData.clerkText }}</p>
       </div>
 
       <!-- Player Bubble (Right - Target) -->
       <div class="self-end flex flex-col items-end w-full">
         <div 
-          class="bg-blue-500 p-6 rounded-2xl rounded-tr-none shadow-md min-w-[200px] min-h-[80px] flex flex-wrap gap-2 justify-end items-center transition-colors duration-300"
+          class="bg-blue-500 p-6 rounded-2xl rounded-tr-none shadow-md min-w-[200px] min-h-[80px] flex flex-wrap gap-2 justify-end items-center transition-colors duration-100"
           :class="{ 'bg-red-500': isWrong, 'bg-green-500': isCorrect }"
         >
           <div 
             v-for="(word, index) in formedSentence" 
             :key="`formed-${index}`"
             @click="removeWord(index)"
-            class="px-3 py-1 bg-white/20 text-white rounded cursor-pointer hover:bg-white/30 transition-colors"
+            class="px-3 py-1 bg-white/20 text-white rounded cursor-pointer hover:bg-white/30 transition-colors duration-100"
           >
             {{ word }}
           </div>
@@ -62,7 +43,7 @@
           v-for="(word, index) in availableWords" 
           :key="`bank-${index}`"
           @click="addWord(word, index)"
-          class="px-6 py-3 bg-white text-slate-800 border-b-4 border-slate-200 rounded-lg shadow-sm hover:-translate-y-1 hover:border-b-6 active:translate-y-0 active:border-b-2 transition-all font-bold text-lg"
+          class="px-6 py-3 bg-white text-slate-800 border-b-4 border-slate-200 rounded-lg shadow-sm hover:-translate-y-1 hover:border-b-6 active:translate-y-0 active:border-b-2 transition-all duration-100 font-bold text-lg"
         >
           {{ word }}
         </button>
