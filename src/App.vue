@@ -52,14 +52,17 @@ import EndScene from './components/EndScene.vue'
 
 import IntroScene from './components/IntroScene.vue'
 import introImage from './assets/intro-scene.jpg'
+import introImage2 from './assets/intro-scene-2.jpg'
 
 // Scene Configuration
 const scenes = ref([
   {
     component: shallowRef(IntroScene),
     props: {
-      src: introImage,
-      caption: 'Again... I lie...'
+      slides: [
+        { src: introImage, caption: 'Again... I lie...', duration: 5000 },
+        { src: introImage2, caption: 'When can I stop...', duration: 5000 }
+      ]
     },
     isGame: false,
     completed: false
