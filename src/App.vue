@@ -53,7 +53,7 @@ import balanceBg2 from './assets/balance-bg-2.jpg'
 import balanceBg3 from './assets/balance-bg-3.jpg'
 
 import BlackScreen from './components/BlackScreen.vue'
-import orderingFoodBg from './assets/ordering-food-bg.png'
+import orderingFoodClerk from './assets/ordering-food-clerk.png'
 import restaurantEntranceImage from './assets/restaurant-entrance.jpg'
 
 // Scene Configuration
@@ -104,7 +104,7 @@ const scenes = ref([
   { 
     component: shallowRef(LanguageGame), 
     props: {
-      backgroundImage: orderingFoodBg
+      backgroundImage: orderingFoodClerk
     }, 
     isGame: true,
     completed: false 
