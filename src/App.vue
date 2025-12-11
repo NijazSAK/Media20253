@@ -62,9 +62,9 @@ const scenes = ref([
     component: shallowRef(IntroScene),
     props: {
       slides: [
-        { src: introImage1, caption: 'Again... I lie...', duration: 3000 },
+        { src: introImage3, caption: 'Again... I lie...', duration: 3000 },
         { src: introImage2, caption: 'When can I stop...', duration: 3000 },
-        { src: introImage3, caption: '...', duration: 3000 }
+        { src: introImage1, caption: '...', duration: 3000 }
       ]
     },
     isGame: false,
