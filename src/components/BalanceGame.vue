@@ -1,59 +1,45 @@
 <template>
   <div class="balance-game relative w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden perspective-container">
     
-    <!-- Custom Background Image -->
-    <div v-if="backgroundImage" class="absolute inset-0 z-0">
-      <img :src="backgroundImage" class="w-full h-full object-cover opacity-50" />
-    </div>
-
-    <!-- Alleyway Background (Default) -->
-    <div v-else class="absolute inset-0 overflow-hidden transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
-      <!-- Sky/Night -->
-      <div class="absolute top-0 w-full h-1/2 bg-gradient-to-b from-slate-900 to-slate-800"></div>
-      <!-- Ground -->
-      <div class="absolute bottom-0 w-full h-1/2 bg-gradient-to-b from-slate-800 to-slate-900"></div>
-      
-      <!-- Walls (Perspective) -->
-      <div class="absolute top-0 left-0 w-full h-full perspective-walls">
-        <div class="absolute top-0 left-0 h-full w-[30%] bg-gradient-to-r from-black to-slate-900 transform origin-left skew-y-12 opacity-80"></div>
-        <div class="absolute top-0 right-0 h-full w-[30%] bg-gradient-to-l from-black to-slate-900 transform origin-right -skew-y-12 opacity-80"></div>
-      </div>
-
-      <!-- Street Lights -->
-      <div class="absolute top-[20%] left-[20%] w-2 h-32 bg-yellow-900/50 blur-sm"></div>
-      <div class="absolute top-[20%] right-[20%] w-2 h-32 bg-yellow-900/50 blur-sm"></div>
+    <!-- Dynamic Backgrounds -->
+    <div class="absolute inset-0 z-0">
+      <transition-group name="fade">
+        <img 
+          v-if="currentBackgroundIndex === 0" 
+          key="bg1"
+          :src="backgrounds[0]" 
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+        />
+        <img 
+          v-if="currentBackgroundIndex === 1" 
+          key="bg2"
+          :src="backgrounds[1]" 
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+        />
+        <img 
+          v-if="currentBackgroundIndex === 2" 
+          key="bg3"
+          :src="backgrounds[2]" 
+          class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+        />
+      </transition-group>
+      <div class="absolute inset-0 bg-black/30"></div>
     </div>
 
     <!-- Game Layer -->
     <div class="relative w-full h-full max-w-4xl mx-auto flex items-center justify-center perspective-view transition-opacity duration-1000" :class="{ 'opacity-100': isActive, 'opacity-0': !isActive }">
       
-      <!-- Character Container (Scales as they walk away) -->
+      <!-- Character/Table Container -->
       <div 
         class="character-rig absolute bottom-10 transition-transform duration-100 ease-linear"
         :style="{ 
-          transform: `scale(${1 - (progress * 0.7)}) translateY(${-progress * 20}px) rotate(${tilt}deg)`,
+          transform: `scale(${1 - (progress * 0.3)}) translateY(${-progress * 50}px) rotate(${tilt}deg)`,
           opacity: isFallen ? 0 : 1
         }"
       >
-        <!-- Stick Figure -->
-        <div class="relative w-20 h-48 flex flex-col items-center">
-          <!-- Head -->
-          <div class="w-12 h-12 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] relative z-10"></div>
-          
-          <!-- Body -->
-          <div class="w-2 h-24 bg-white rounded-full -mt-1 relative z-0"></div>
-          
-          <!-- Arms (Flailing) -->
-          <div 
-            class="absolute top-14 w-32 h-2 bg-white rounded-full transition-transform duration-300"
-            :style="{ transform: `rotate(${-tilt * 2}deg)` }"
-          ></div>
-
-          <!-- Legs (Walking Animation) -->
-          <div class="absolute bottom-0 w-full h-24">
-            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-left" :class="{ 'paused': gameState !== 'playing' }"></div>
-            <div class="absolute left-1/2 top-0 w-2 h-24 bg-white origin-top animate-walk-right" :class="{ 'paused': gameState !== 'playing' }"></div>
-          </div>
+        <!-- Table Sprite -->
+        <div class="relative w-48 h-48 flex flex-col items-center justify-end">
+           <img :src="tableSprite" class="w-full h-full object-contain drop-shadow-2xl" alt="Balance Object" />
         </div>
       </div>
 
@@ -62,12 +48,12 @@
         <div class="text-9xl font-bold text-white animate-pulse drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
           {{ countdown }}
         </div>
-        <div class="absolute bottom-1/4 text-white/70 text-xl tracking-widest uppercase">Get Ready...</div>
+        <div class="absolute bottom-1/4 text-white/70 text-xl tracking-widest uppercase">Keep it steady...</div>
       </div>
 
       <!-- Fall Message -->
       <div v-if="isFallen" class="absolute inset-0 flex items-center justify-center bg-black/80 z-50 animate-fade-in">
-        <h2 class="text-4xl font-bold text-red-500 tracking-widest uppercase">Oof...</h2>
+        <h2 class="text-4xl font-bold text-red-500 tracking-widest uppercase">Spilled...</h2>
       </div>
 
     </div>
@@ -108,11 +94,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import tableSprite from '../assets/table-sprite.png'
 
 const props = defineProps({
   isActive: Boolean,
-  backgroundImage: String
+  backgrounds: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const emit = defineEmits(['complete'])
@@ -123,16 +113,22 @@ const pushForce = ref(0)
 const progress = ref(0) // 0 to 1
 const isFallen = ref(false)
 const gameState = ref('idle') // idle, countdown, playing, ended
-const countdown = ref(5)
+const countdown = ref(3)
 
 // Game Config
-const walkSpeed = 0.0015 // Progress per frame
-const maxTilt = 60
-const drunkNoise = 0.3 // Random force magnitude
+const walkSpeed = 0.0010 // Slower progress for tension
+const maxTilt = 45
+const drunkNoise = 0.2 
 
 let gameLoop = null
 let lastTime = 0
 let countdownTimer = null
+
+const currentBackgroundIndex = computed(() => {
+  if (progress.value < 0.33) return 0
+  if (progress.value < 0.66) return 1
+  return 2
+})
 
 const startGameSequence = () => {
   // Reset
@@ -142,7 +138,7 @@ const startGameSequence = () => {
   progress.value = 0
   isFallen.value = false
   gameState.value = 'countdown'
-  countdown.value = 5
+  countdown.value = 3
   
   // Countdown Loop
   if (countdownTimer) clearInterval(countdownTimer)
@@ -170,7 +166,7 @@ watch(() => props.isActive, (newVal) => {
 
 const startPush = (direction) => {
   if (gameState.value !== 'playing') return
-  pushForce.value = direction * 0.6
+  pushForce.value = direction * 0.5
 }
 
 const stopPush = () => {
@@ -184,15 +180,12 @@ const update = (timestamp) => {
   const dt = (timestamp - lastTime) / 16
   lastTime = timestamp
 
-  // 1. Progress (Walking forward)
+  // 1. Progress
   progress.value += walkSpeed * dt
 
   // 2. Physics
-  // Drunk noise (random perturbations)
   const noise = (Math.random() - 0.5) * drunkNoise
-  
-  // Gravity (instability increases as you tilt)
-  const gravity = Math.sin(tilt.value * Math.PI / 180) * 0.25
+  const gravity = Math.sin(tilt.value * Math.PI / 180) * 0.3
 
   velocity.value += (gravity + pushForce.value + noise) * dt
   velocity.value *= 0.96 // Friction
@@ -200,13 +193,11 @@ const update = (timestamp) => {
   tilt.value += velocity.value * dt
 
   // 3. Win/Lose Conditions
-  // Fall?
   if (Math.abs(tilt.value) > maxTilt) {
     handleFail()
     return
   }
 
-  // Finished?
   if (progress.value >= 1) {
     handleSuccess()
     return
@@ -263,33 +254,21 @@ onUnmounted(() => {
   transform-style: preserve-3d;
 }
 
-/* Walking Animation */
-@keyframes walkLeft {
-  0%, 100% { transform: rotate(15deg); }
-  50% { transform: rotate(-15deg); }
-}
-@keyframes walkRight {
-  0%, 100% { transform: rotate(-15deg); }
-  50% { transform: rotate(15deg); }
-}
-
-.animate-walk-left {
-  animation: walkLeft 1s infinite ease-in-out;
-}
-.animate-walk-right {
-  animation: walkRight 1s infinite ease-in-out;
-  animation-delay: 0.5s;
-}
-
-.paused {
-  animation-play-state: paused;
-}
-
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

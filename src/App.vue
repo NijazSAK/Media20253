@@ -55,6 +55,10 @@ import introImage from './assets/intro-scene.jpg'
 import introImage2 from './assets/intro-scene-2.jpg'
 import introImage3 from './assets/intro-scene-3.jpg'
 
+import balanceBg1 from './assets/balance-bg-1.jpg'
+import balanceBg2 from './assets/balance-bg-2.jpg'
+import balanceBg3 from './assets/balance-bg-3.jpg'
+
 // Scene Configuration
 const scenes = ref([
   {
@@ -70,30 +74,10 @@ const scenes = ref([
     completed: false
   },
   { 
-    component: shallowRef(Scene), 
-    // Quick shots of city life
-    props: { 
-      src: [
-        'https://picsum.photos/id/43/1920/1080', // City
-        'https://picsum.photos/id/48/1920/1080', // Architecture
-        'https://picsum.photos/id/60/1920/1080', // Office
-        'https://picsum.photos/id/180/1920/1080' // Laptop
-      ], 
-      caption: 'It started like any other day... fast paced.',
-      animationSpeed: 400 
-    },
-    isGame: false,
-    completed: false
-  },
-  { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/11/1920/1080', caption: 'But something felt off balance.' },
-    isGame: false,
-    completed: false
-  },
-  { 
     component: shallowRef(BalanceGame), 
-    props: {}, 
+    props: {
+      backgrounds: [balanceBg1, balanceBg2, balanceBg3]
+    }, 
     isGame: true,
     completed: false 
   },
