@@ -57,12 +57,7 @@
         <div class="absolute bottom-1/4 text-white/70 text-xl tracking-widest uppercase">Keep it steady...</div>
       </div>
 
-      <!-- Fall Message -->
-      <div v-if="isFallen" class="absolute inset-0 flex items-center justify-center bg-black z-50 animate-fade-in">
-        <h2 class="text-5xl md:text-7xl font-bold text-red-600 tracking-widest uppercase drop-shadow-lg text-center px-4 animate-shake">
-          OWWW!<br>NOT AGAIN!!!
-        </h2>
-      </div>
+
 
     </div>
 
@@ -96,6 +91,13 @@
         @mouseup="stopPush"
         @mouseleave="stopPush"
       ></div>
+    </div>
+
+    <!-- Fall Message (Full Screen Overlay) -->
+    <div v-if="isFallen" class="absolute inset-0 flex items-center justify-center bg-black z-[100] animate-fade-in">
+      <h2 class="text-5xl md:text-7xl font-bold text-red-600 tracking-widest uppercase drop-shadow-lg text-center px-4 animate-shake">
+        OWWW!<br>NOT AGAIN!!!
+      </h2>
     </div>
 
   </div>
