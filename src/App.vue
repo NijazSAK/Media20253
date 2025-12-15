@@ -176,24 +176,7 @@ const scenes = ref([
     completed: false,
     autoAdvance: true
   },
-  { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/64/1920/1080', caption: '"You weren\'t cut out for this," he scoffed, walking past me.' },
-    isGame: false,
-    completed: false
-  },
-  { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/55/1920/1080', caption: '"WAIT! HOW DID YOU DO THAT!?" I screamed, desperate.' },
-    isGame: false,
-    completed: false
-  },
-  { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/225/1920/1080', caption: 'He turned, holding up a package. "10-minute ready meal."' },
-    isGame: false,
-    completed: false
-  },
+
   { 
     component: shallowRef(EndScene), 
     props: { 
