@@ -59,7 +59,7 @@ import Scene from './components/Scene.vue'
 import BalanceGame from './components/BalanceGame.vue'
 import LanguageGame from './components/LanguageGame.vue'
 import WakeUpGame from './components/WakeUpGame.vue'
-import EndScene from './components/EndScene.vue'
+
 
 import IntroScene from './components/IntroScene.vue'
 import introImage1 from './assets/intro-1.png'
@@ -178,36 +178,7 @@ const scenes = ref([
     autoAdvance: true
   },
 
-  { 
-    component: shallowRef(EndScene), 
-    props: { 
-      // Flashback Sequence (Ad Montage)
-      src: [
-        'https://picsum.photos/id/43/1920/1080',  // City
-        'https://picsum.photos/id/11/1920/1080',  // Balance
-        'https://picsum.photos/id/12/1920/1080',  // Confusion
-        'https://picsum.photos/id/13/1920/1080',  // Exhaustion
-        'https://picsum.photos/id/14/1920/1080',  // Struggle
-        'https://picsum.photos/id/15/1920/1080',  // Clarity
-        'https://picsum.photos/id/292/1920/1080', // Food/Meal
-        'https://picsum.photos/id/88/1920/1080'   // Slogan/Logo Background
-      ],
-      // Place your audio file in public/music/ending.mp3
-      audioSrc: '/music/ending.mp3', 
-      script: [
-        "The city rush, a blur of grey,",
-        "Stumbling through the alleyway.",
-        "Words get lost, the mind goes weak,",
-        "Energy is the thing you seek.",
-        "Why fight the tired, heavy eyes?",
-        "When the secret to winning lies...",
-        "...in a flavor that's quick and real.",
-        "StickBurger. The 10-Minute Ready Meal."
-      ]
-    },
-    isGame: false,
-    completed: false
-  }
+
 ])
 
 const currentSceneIndex = ref(0)
