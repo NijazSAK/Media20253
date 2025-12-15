@@ -72,8 +72,8 @@ import balanceBg3 from './assets/balance-bg-3.jpg'
 import BlackScreen from './components/BlackScreen.vue'
 import orderingFoodClerk from './assets/ordering-food-clerk.png'
 import restaurantEntranceImage from './assets/restaurant-entrance.jpg'
-import exhaustedImage from './assets/exhaustion.jpg'
-import finalAdImage from './assets/final-ad.jpg'
+import exhaustionImage from './assets/exhaustion.jpg'
+import benchScene from './assets/bench-scene.jpg'
 
 // Scene Configuration
 const scenes = ref([
@@ -140,19 +140,85 @@ const scenes = ref([
     completed: false
   },
 
+  // Poem Sequence replacing WakeUpGame
+  { 
+    component: shallowRef(Scene), 
+    props: { src: benchScene, caption: 'In the static hum of the midnight air...', duration: 4000 },
+    isGame: false,
+    completed: false,
+    autoAdvance: true
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: benchScene, caption: 'We shared a silence, a burden bare.', duration: 4000 },
+    isGame: false,
+    completed: false,
+    autoAdvance: true
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: benchScene, caption: 'No words needed for the bond we feel,', duration: 4000 },
+    isGame: false,
+    completed: false,
+    autoAdvance: true
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: benchScene, caption: 'Just the honest warmth of a 10-minute meal.', duration: 4500 },
+    isGame: false,
+    completed: false,
+    autoAdvance: true
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: benchScene, caption: 'StickBurger. For the microwave only.', duration: 4000 },
+    isGame: false,
+    completed: false,
+    autoAdvance: true
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/64/1920/1080', caption: '"You weren\'t cut out for this," he scoffed, walking past me.' },
+    isGame: false,
+    completed: false
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/55/1920/1080', caption: '"WAIT! HOW DID YOU DO THAT!?" I screamed, desperate.' },
+    isGame: false,
+    completed: false
+  },
+  { 
+    component: shallowRef(Scene), 
+    props: { src: 'https://picsum.photos/id/225/1920/1080', caption: 'He turned, holding up a package. "10-minute ready meal."' },
+    isGame: false,
+    completed: false
+  },
   { 
     component: shallowRef(EndScene), 
     props: { 
-      // Same image repeated for each line of the poem
-      src: Array(6).fill(finalAdImage),
+      // Flashback Sequence (Ad Montage)
+      src: [
+        'https://picsum.photos/id/43/1920/1080',  // City
+        'https://picsum.photos/id/11/1920/1080',  // Balance
+        'https://picsum.photos/id/12/1920/1080',  // Confusion
+        'https://picsum.photos/id/13/1920/1080',  // Exhaustion
+        'https://picsum.photos/id/14/1920/1080',  // Struggle
+        'https://picsum.photos/id/15/1920/1080',  // Clarity
+        'https://picsum.photos/id/292/1920/1080', // Food/Meal
+        'https://picsum.photos/id/88/1920/1080'   // Slogan/Logo Background
+      ],
+      // Place your audio file in public/music/ending.mp3
       audioSrc: '/music/ending.mp3', 
       script: [
-        "In shadowed streets where lonely footsteps tread,",
-        "We seek a warmth that's more than just the bread.",
-        "For hunger deep isn't cured by rush and haste,",
-        "But by the memory of a shared taste.",
-        "So take this meal, a simple friend in need,",
-        "Ten minutes' grace, a soul and body feed."
+        "The city rush, a blur of grey,",
+        "Stumbling through the alleyway.",
+        "Words get lost, the mind goes weak,",
+        "Energy is the thing you seek.",
+        "Why fight the tired, heavy eyes?",
+        "When the secret to winning lies...",
+        "...in a flavor that's quick and real.",
+        "StickBurger. The 10-Minute Ready Meal."
       ]
     },
     isGame: false,
