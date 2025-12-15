@@ -6,8 +6,8 @@
       alt="Scene"
     />
     <div :class="[
-      'absolute text-white transition-all duration-500',
-      centered ? 'inset-0 flex items-center justify-center p-8 text-center' : 'bottom-12 left-8 max-w-md'
+      'absolute transition-all duration-500',
+      centered ? 'inset-0 flex items-center justify-center p-8 text-center text-black' : 'bottom-12 left-8 max-w-md text-white'
     ]">
       <p :class="['font-light tracking-wide drop-shadow-md', centered ? 'text-3xl font-serif italic' : 'text-lg']">{{ caption }}</p>
     </div>

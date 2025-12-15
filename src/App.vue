@@ -25,6 +25,7 @@
         <component 
           :is="scenes[currentSceneIndex].component" 
           v-bind="scenes[currentSceneIndex].props" 
+          :key="currentSceneIndex"
           :isActive="true"
           @complete="unlockScene(currentSceneIndex, $event)"
         />
