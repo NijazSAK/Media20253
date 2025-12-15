@@ -31,7 +31,7 @@
         />
       </transition>
 
-      <!-- Skip Button (Global Overlay) -->
+      <!-- Skip Button (Global Overlay)d -->
       <button 
         v-if="scenes[currentSceneIndex].isGame && !scenes[currentSceneIndex].completed" 
         @click="unlockScene(currentSceneIndex, { success: true })"
