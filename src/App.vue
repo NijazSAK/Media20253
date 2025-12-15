@@ -143,35 +143,35 @@ const scenes = ref([
   // Poem Sequence replacing WakeUpGame
   { 
     component: shallowRef(Scene), 
-    props: { src: benchScene, caption: 'In the static hum of the midnight air...', duration: 4000 },
+    props: { src: benchScene, caption: 'In the static hum of the midnight air...', duration: 5000, centered: true },
     isGame: false,
     completed: false,
     autoAdvance: true
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: benchScene, caption: 'We shared a silence, a burden bare.', duration: 4000 },
+    props: { src: benchScene, caption: 'We shared a silence, a burden bare.', duration: 5000, centered: true },
     isGame: false,
     completed: false,
     autoAdvance: true
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: benchScene, caption: 'No words needed for the bond we feel,', duration: 4000 },
+    props: { src: benchScene, caption: 'No words needed for the bond we feel,', duration: 5000, centered: true },
     isGame: false,
     completed: false,
     autoAdvance: true
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: benchScene, caption: 'Just the honest warmth of a 10-minute meal.', duration: 4500 },
+    props: { src: benchScene, caption: 'Just the honest warmth of a 10-minute meal.', duration: 5000, centered: true },
     isGame: false,
     completed: false,
     autoAdvance: true
   },
   { 
     component: shallowRef(Scene), 
-    props: { src: benchScene, caption: 'StickBurger. For the microwave only.', duration: 4000 },
+    props: { src: benchScene, caption: 'StickBurger. For the microwave only.', duration: 5000, centered: true },
     isGame: false,
     completed: false,
     autoAdvance: true

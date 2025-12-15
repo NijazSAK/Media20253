@@ -5,9 +5,11 @@
       class="w-full h-full object-cover transition-transform duration-[2000ms] ease-in-out hover:scale-105"
       alt="Scene"
     />
-    <div class="absolute inset-0 bg-black/20"></div>
-    <div class="absolute bottom-12 left-8 max-w-md text-white">
-      <p class="text-lg font-light tracking-wide drop-shadow-md">{{ caption }}</p>
+    <div :class="[
+      'absolute text-white transition-all duration-500',
+      centered ? 'inset-0 flex items-center justify-center p-8 text-center' : 'bottom-12 left-8 max-w-md'
+    ]">
+      <p :class="['font-light tracking-wide drop-shadow-md', centered ? 'text-3xl font-serif italic' : 'text-lg']">{{ caption }}</p>
     </div>
   </div>
 </template>
@@ -22,7 +24,8 @@ const props = defineProps({
     type: Number,
     default: 1000
   },
-  isActive: Boolean
+  isActive: Boolean,
+  centered: Boolean
 })
 
 const emit = defineEmits(['complete'])
