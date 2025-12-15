@@ -9,7 +9,7 @@
       'absolute transition-all duration-500',
       centered ? 'inset-0 flex items-center justify-center p-8 text-center text-black' : 'bottom-12 left-8 max-w-md text-white'
     ]">
-      <p :class="['font-light tracking-wide drop-shadow-md', centered ? 'text-3xl font-serif italic' : 'text-lg']">{{ caption }}</p>
+      <p :class="['drop-shadow-md', centered ? 'text-5xl md:text-6xl font-black tracking-wider leading-tight' : 'text-lg font-light tracking-wide']">{{ caption }}</p>
     </div>
   </div>
 </template>
