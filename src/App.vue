@@ -55,6 +55,7 @@ import balanceBg3 from './assets/balance-bg-3.jpg'
 import BlackScreen from './components/BlackScreen.vue'
 import orderingFoodClerk from './assets/ordering-food-clerk.png'
 import restaurantEntranceImage from './assets/restaurant-entrance.jpg'
+import exhaustionImage from './assets/exhaustion.jpg'
 
 // Scene Configuration
 const scenes = ref([
@@ -113,13 +114,9 @@ const scenes = ref([
     component: shallowRef(Scene), 
     // Darker, slower shots
     props: { 
-      src: [
-        'https://picsum.photos/id/13/1920/1080', // Beach/Calm?
-        'https://picsum.photos/id/19/1920/1080', // Darker
-        'https://picsum.photos/id/26/1920/1080'  // Objects
-      ],
-      caption: 'Exhaustion took over.',
-      animationSpeed: 1500
+      src: exhaustionImage,
+      caption: 'Is that him?',
+      duration: 3000
     },
     isGame: false,
     completed: false
