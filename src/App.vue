@@ -3,6 +3,23 @@
     <!-- Main Scene Container -->
     <div class="w-full h-full relative">
       
+      <!-- Global Header -->
+      <header class="absolute top-0 left-0 w-full z-[60] p-6 flex items-start pointer-events-none">
+        <a 
+          href="https://new-test-one-tau.vercel.app/" 
+          class="pointer-events-auto group flex items-center gap-3 text-white/60 hover:text-white transition-all duration-300 ease-out"
+        >
+          <span class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-white/80 group-hover:bg-white/10 transition-all">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transform group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </span>
+          <span class="font-mono text-xs uppercase tracking-[0.2em] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+            Return to Hub
+          </span>
+        </a>
+      </header>
+
       <!-- Current Scene -->
       <transition name="fade" mode="out-in">
         <component 
@@ -121,12 +138,7 @@ const scenes = ref([
     isGame: false,
     completed: false
   },
-  { 
-    component: shallowRef(Scene), 
-    props: { src: 'https://picsum.photos/id/14/1920/1080', caption: 'Trying to stay awake...' },
-    isGame: false,
-    completed: false
-  },
+
   { 
     component: shallowRef(WakeUpGame), 
     props: {}, 
